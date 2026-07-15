@@ -401,6 +401,8 @@ function driveImg(u){
   const m=u.match(/drive\.google\.com\/file\/d\/([\w-]+)/)||u.match(/[?&]id=([\w-]+)/)||u.match(/googleusercontent\.com\/d\/([\w-]+)/);
   return m?("https://drive.google.com/thumbnail?id="+m[1]+"&sz=w2000"):u;
 }
+/* ลองโหลดรูป ถ้าโหลดได้เรียก ok(url) ถ้าไม่ได้เรียก fail() */
+function tryImg(url,ok,fail){const im=new Image();im.onload=()=>ok(url);im.onerror=()=>fail();im.src=url;}
 
 function go(p){
   $$(".page").forEach(x=>x.classList.remove("on"));
@@ -438,14 +440,16 @@ function applySettings(){
   $("#qSend").href=$("#tSend").href=CONFIG.formLink;
   $("#tDrive").href=CONFIG.driveLink; $("#tCal").href=CONFIG.calendarLink;
   $("#tickerRun").innerHTML=CONFIG.announcements.map(a=>"<span>"+esc(a)+"</span>").join("");
-  /* แบนเนอร์ภาพพื้นหลัง (ตั้งค่า bannerImg ในชีต settings) */
-  if(CONFIG.bannerImg){const h=$("#heroBox");h.classList.add("hasimg");h.style.backgroundImage="url('"+driveImg(CONFIG.bannerImg).replace(/'/g,"")+"')";}
+  /* แบนเนอร์: ลองใช้ banner.jpg ในโฟลเดอร์เว็บก่อน ถ้าไม่มีค่อยใช้ลิงก์จากชีต */
+  tryImg("banner.jpg",u=>{const hb=$("#heroBox");hb.classList.add("hasimg");hb.style.backgroundImage="url('"+u+"')";},
+    ()=>{ if(CONFIG.bannerImg){const u=driveImg(CONFIG.bannerImg).replace(/'/g,"");tryImg(u,uu=>{const hb=$("#heroBox");hb.classList.add("hasimg");hb.style.backgroundImage="url('"+uu+"')";},()=>{});} });
   /* การ์ดรูปผู้อำนวยการ (directorName / directorPos / directorPhoto ในชีต settings) */
   if(CONFIG.directorName||CONFIG.directorPhoto){
     $("#dirCard").style.display="block";
     $("#dirName").textContent=CONFIG.directorName||"";
     $("#dirPos").textContent=CONFIG.directorPos||"ผู้อำนวยการโรงเรียน";
-    if(CONFIG.directorPhoto)$("#dirFrame").innerHTML='<img src="'+esc(driveImg(CONFIG.directorPhoto))+'" alt="ผู้อำนวยการ">';
+    tryImg("director.jpg",u=>{$("#dirFrame").innerHTML='<img src="'+u+'" alt="ผู้อำนวยการ">';},
+      ()=>{ if(CONFIG.directorPhoto)tryImg(driveImg(CONFIG.directorPhoto),u=>{$("#dirFrame").innerHTML='<img src="'+esc(u)+'" alt="ผู้อำนวยการ">';},()=>{}); });
   }
   /* ข้อความ Welcome ภาษาอังกฤษ (welcomeText ในชีต settings) */
   if(CONFIG.welcomeText){$("#welcomeLine").style.display="block";$("#welcomeLine").textContent=CONFIG.welcomeText;}
