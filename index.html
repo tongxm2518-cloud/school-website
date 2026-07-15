@@ -149,6 +149,18 @@ a.card-link{text-decoration:none;color:inherit;display:block}
 .frow .fi{font-size:19px}
 .frow .cat{margin-left:auto}
 
+/* ===== คลังเอกสาร: ค้นหา + โมดัล ===== */
+.vault-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:4px 0 14px}
+.vault-bar input{flex:1;min-width:220px;padding:10px 16px;border:1.5px solid var(--line);border-radius:99px;font-family:'Sarabun';font-size:14.5px;outline:none;background:#fff}
+.vault-bar input:focus{border-color:var(--navy)}
+.modal-bg{position:fixed;inset:0;background:rgba(10,18,38,.72);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-bg.on{display:flex}
+.modal{background:#fff;border-radius:16px;width:min(1000px,96vw);height:min(680px,90vh);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.4)}
+.modal .mh{display:flex;align-items:center;gap:12px;padding:12px 18px;background:var(--navy);color:#fff}
+.modal .mh b{font-size:15.5px;flex:1;color:var(--goldsoft)}
+.modal .mh a{color:#fff;font-size:13px;text-decoration:none;border:1px solid rgba(255,255,255,.4);padding:5px 13px;border-radius:99px}
+.modal .mh button{background:var(--red);border:none;color:#fff;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer}
+.modal iframe{flex:1;border:none;width:100%}
 /* ===== คู่มือผู้ดูแล ===== */
 .steps{counter-reset:s}
 .step{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px 18px 66px;margin-bottom:14px;position:relative;box-shadow:var(--shadow)}
@@ -277,9 +289,20 @@ footer b{color:var(--goldsoft)}
     <a class="tool" id="tMeet" target="_blank"><div class="ic">🎥</div><div><b>ประชุมออนไลน์ (Meet)</b><small>ลิงก์ห้องประชุมประจำโรงเรียน กดเข้าได้ทันที</small></div></a>
     <a class="tool" id="tCal" target="_blank"><div class="ic">📅</div><div><b>ปฏิทินโรงเรียน</b><small>นัดประชุม/กิจกรรม แจ้งเตือนครูอัตโนมัติ</small></div></a>
   </div>
+  <div style="height:26px"></div>
+  <div class="sec-head"><h2>คลังเอกสารดิจิทัล</h2><div class="rule"></div><span class="auto-badge">ค้นหา · กรองหมวด/ปี · เปิดดูในเว็บ</span></div>
+  <p class="sec-sub">แฟ้มผลงาน ผอ. ผลงานครู นักเรียน SAR นิเทศ PLC เกียรติบัตร — กดการ์ดเพื่อเปิดดูไฟล์ในโฟลเดอร์ได้ทันที</p>
+  <div class="vault-bar"><input id="fileSearch" placeholder="🔍 พิมพ์ค้นหาเอกสาร เช่น SAR, นิเทศ, เกียรติบัตร..." oninput="drawFiles()"></div>
+  <div class="filters" id="fileFilters"></div>
   <div class="filelist">
-    <div class="fh">📚 สื่อการสอนและเอกสารล่าสุด (จากชีต — เพิ่มแถวเดียวขึ้นเว็บเลย)</div>
+    <div class="fh">📚 เอกสารทั้งหมด (เพิ่ม/แก้ผ่านชีตแท็บ files)</div>
     <div id="fileRows"></div>
+  </div>
+  <div class="modal-bg" id="driveModal" onclick="if(event.target===this)closeDrive()">
+    <div class="modal">
+      <div class="mh"><b id="dmTitle">เอกสาร</b><a id="dmOpen" target="_blank">เปิดใน Drive ↗</a><button onclick="closeDrive()">✕</button></div>
+      <iframe id="dmFrame" src="about:blank"></iframe>
+    </div>
   </div>
 </section>
 
@@ -384,12 +407,16 @@ results:[
  {test:"RT",year:"2568",subject:"อ่านรู้เรื่อง",school:75.1,national:72.6}
 ],
 files:[
- {name:"แผนการสอน Active Learning ทุกกลุ่มสาระ",cat:"สื่อการสอน",icon:"📘",link:"#"},
- {name:"แบบฝึกอ่านเขียน ป.1 (RT)",cat:"สื่อการสอน",icon:"📗",link:"#"},
- {name:"คลังข้อสอบ O-NET ย้อนหลัง + เฉลย",cat:"ข้อสอบ",icon:"📝",link:"#"},
- {name:"แบบฟอร์ม ปพ.5 / ปพ.6 อัตโนมัติ",cat:"งานวิชาการ",icon:"📊",link:"#"},
- {name:"รายงานการประชุมครู (เก็บอัตโนมัติทุกเดือน)",cat:"งานบริหาร",icon:"🗂️",link:"#"},
- {name:"SAR รายงานประเมินตนเองของสถานศึกษา",cat:"งานประกัน",icon:"📑",link:"#"}
+ {name:"แฟ้มผลงานผู้อำนวยการ",cat:"ผลงาน ผอ.",icon:"🏆",year:"2569",link:"#"},
+ {name:"ผลงานครูและบุคลากร",cat:"ผลงานครู",icon:"👩‍🏫",year:"2569",link:"#"},
+ {name:"ผลงานนักเรียน",cat:"ผลงานนักเรียน",icon:"🎒",year:"2569",link:"#"},
+ {name:"นิเทศ PLC ปี 67",cat:"นิเทศ PLC",icon:"📋",year:"2567",link:"#"},
+ {name:"นิเทศ PLC ปี 68",cat:"นิเทศ PLC",icon:"📋",year:"2568",link:"#"},
+ {name:"นิเทศ PLC ปี 69",cat:"นิเทศ PLC",icon:"📋",year:"2569",link:"#"},
+ {name:"SAR รายงานประเมินตนเองของสถานศึกษา",cat:"งานประกัน",icon:"📑",year:"2568",link:"#"},
+ {name:"ผลการทดสอบ O-NET",cat:"งานวิชาการ",icon:"📊",year:"2568",link:"#"},
+ {name:"เกียรติบัตรและรางวัล",cat:"เกียรติบัตร",icon:"🎖️",year:"2569",link:"#"},
+ {name:"สื่อการสอนทุกกลุ่มสาระ",cat:"สื่อการสอน",icon:"📘",year:"2569",link:"#"}
 ]};
 
 /* ================= เครื่องมือหลัก ================= */
@@ -405,6 +432,12 @@ function driveImg(u){
 function tryImg(url,ok,fail){const im=new Image();im.onload=()=>ok(url);im.onerror=()=>fail();im.src=url;}
 /* ลองรายชื่อไฟล์ทีละตัวจนกว่าจะเจอ */
 function tryImgs(list,ok,fail){ if(!list.length)return fail(); tryImg(list[0],ok,()=>tryImgs(list.slice(1),ok,fail)); }
+/* ระบบอนุมัติ: ถ้าชีตมีคอลัมน์ approve แถวจะแสดงเมื่อแอดมินพิมพ์คำอนุมัติเท่านั้น
+   คำที่นับว่าอนุมัติ: อนุมัติ / ผ่าน / y / yes / ok / 1  (ไม่มีคอลัมน์ approve = แสดงทุกแถวตามปกติ) */
+function approvedRows(rows){
+  if(!rows||!rows.length||!("approve" in rows[0]))return rows;
+  return rows.filter(r=>/^(อนุมัติ|ผ่าน|y|yes|ok|1)$/i.test((r.approve||"").trim()));
+}
 
 function go(p){
   $$(".page").forEach(x=>x.classList.remove("on"));
@@ -575,11 +608,46 @@ function renderResults(rows){
     {label:"ค่าเฉลี่ยประเทศ",data:ntrt.map(r=>r.national),backgroundColor:GRAY,borderRadius:6}]},options:opts});
 }
 
-/* ================= คลังไฟล์ ================= */
+/* ================= คลังไฟล์ / คลังเอกสารดิจิทัล ================= */
+let fileState={cat:"ทั้งหมด",year:"ทุกปี"};
 function renderFiles(list){
-  $("#fileRows").innerHTML=list.map(f=>`<a class="frow" href="${esc(f.link||"#")}" target="_blank">
-    <span class="fi">${esc(f.icon||"📄")}</span> ${esc(f.name)} <span class="chip cat">${esc(f.cat||"")}</span></a>`).join("");
+  window._files=list;
+  const cats=["ทั้งหมด",...new Set(list.map(f=>f.cat).filter(Boolean))];
+  const years=[...new Set(list.map(f=>f.year).filter(Boolean))].sort().reverse();
+  $("#fileFilters").innerHTML=
+    cats.map((c,i)=>`<button class="${i?"":"on"}" data-t="cat" data-v="${esc(c)}" onclick="filterFiles(this)">${esc(c)}</button>`).join("")
+    +(years.length?`<span class="sep">|</span><button class="on" data-t="year" data-v="ทุกปี" onclick="filterFiles(this)">ทุกปี</button>`
+      +years.map(y=>`<button data-t="year" data-v="${esc(y)}" onclick="filterFiles(this)">พ.ศ. ${esc(y)}</button>`).join(""):"");
+  drawFiles();
 }
+function filterFiles(btn){
+  fileState[btn.dataset.t]=btn.dataset.v;
+  $$(`#fileFilters button[data-t=${btn.dataset.t}]`).forEach(b=>b.classList.remove("on"));
+  btn.classList.add("on"); drawFiles();
+}
+function drawFiles(){
+  const q=($("#fileSearch")&&$("#fileSearch").value||"").trim().toLowerCase();
+  const list=(window._files||[]).filter(f=>
+    (fileState.cat==="ทั้งหมด"||f.cat===fileState.cat)&&
+    (fileState.year==="ทุกปี"||(f.year||"")===fileState.year)&&
+    (!q||(f.name||"").toLowerCase().includes(q)||(f.cat||"").toLowerCase().includes(q)));
+  $("#fileRows").innerHTML=list.length?list.map((f,i)=>`<a class="frow" href="${esc(f.link||"#")}" onclick="return openDrive(${i},'${esc((f.link||"").replace(/'/g,""))}')" data-nm="${esc(f.name)}" target="_blank">
+    <span class="fi">${esc(f.icon||"📄")}</span> ${esc(f.name)} ${f.year?`<span class="chip gold">พ.ศ. ${esc(f.year)}</span>`:""} <span class="chip cat">${esc(f.cat||"")}</span></a>`).join("")
+    :'<div class="loadmsg">ไม่พบเอกสารที่ค้นหา</div>';
+  window._fileview=list;
+}
+/* เปิดโฟลเดอร์ Drive แบบฝังในเว็บ */
+function openDrive(i,link){
+  const m=link.match(/drive\.google\.com\/drive\/(?:u\/\d+\/)?folders\/([\w-]+)/);
+  if(!m)return true; /* ไม่ใช่โฟลเดอร์ Drive → เปิดลิงก์ปกติ */
+  const f=window._fileview[i];
+  $("#dmTitle").textContent=(f.icon||"📁")+" "+f.name;
+  $("#dmOpen").href=link;
+  $("#dmFrame").src="https://drive.google.com/embeddedfolderview?id="+m[1]+"#grid";
+  $("#driveModal").classList.add("on");
+  return false;
+}
+function closeDrive(){$("#driveModal").classList.remove("on");$("#dmFrame").src="about:blank";}
 
 /* ================= เริ่มระบบ ================= */
 (async function init(){
@@ -589,11 +657,11 @@ function renderFiles(list){
   applySettings();
   /* 2) โหลดทุกส่วนพร้อมกัน — ชีตไม่มี = ใช้เดโม่ */
   const [nw,sf,gl,rs,fl]=await Promise.all([loadSheet("news"),loadSheet("staff"),loadSheet("gallery"),loadSheet("results"),loadSheet("files")]);
-  renderSchoolNews(nw&&nw.length?nw:DEMO.news);
-  renderStaff(sf&&sf.length?sf:DEMO.staff);
-  renderGallery(gl&&gl.length?gl:DEMO.gallery);
+  renderSchoolNews(nw&&nw.length?approvedRows(nw):DEMO.news);
+  renderStaff(sf&&sf.length?approvedRows(sf):DEMO.staff);
+  renderGallery(gl&&gl.length?approvedRows(gl):DEMO.gallery);
   renderResults(rs&&rs.length?rs:DEMO.results);
-  renderFiles(fl&&fl.length?fl:DEMO.files);
+  renderFiles(fl&&fl.length?approvedRows(fl):DEMO.files);
   /* 3) ข่าวการศึกษาอัตโนมัติ */
   loadEduNews();
 })();
