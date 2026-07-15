@@ -41,11 +41,21 @@ nav.main button.tab.on{color:var(--goldsoft);border-bottom-color:var(--gold)}
 
 /* ===== ฮีโร่ : ป้ายโรงเรียน ===== */
 .hero{background:linear-gradient(160deg,var(--navy) 0%,var(--deep) 90%);padding:52px 0 60px;position:relative;overflow:hidden}
-.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(600px 300px at 85% 10%,rgba(240,180,41,.14),transparent)}
-.sign{position:relative;max-width:780px;margin:0 auto;text-align:center;border:3px solid var(--gold);outline:1px solid rgba(240,180,41,.45);outline-offset:7px;padding:38px 30px 32px;color:#fff}
+.hero.hasimg{background-size:cover;background-position:center}
+.hero.hasimg::after{content:"";position:absolute;inset:0;background:linear-gradient(160deg,rgba(17,31,62,.82),rgba(17,31,62,.62))}
+.hero .wrap{position:relative;z-index:2}
+.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(600px 300px at 85% 10%,rgba(240,180,41,.14),transparent);z-index:1}
+.hero-layout{display:flex;align-items:center;justify-content:center;gap:34px;flex-wrap:wrap}
+.sign{position:relative;max-width:720px;flex:1 1 480px;text-align:center;border:3px solid var(--gold);outline:1px solid rgba(240,180,41,.45);outline-offset:7px;padding:38px 30px 32px;color:#fff;background:rgba(17,31,62,.35);backdrop-filter:blur(2px)}
 .sign .crest{font-size:44px;line-height:1}
-.sign h1{font-family:'Chonburi';font-size:clamp(28px,4.6vw,46px);color:var(--goldsoft);margin:10px 0 6px;font-weight:400;letter-spacing:.5px}
-.sign p{color:#C7D1EA;font-size:15px}
+.sign h1{font-family:'Chonburi';font-size:clamp(26px,4.4vw,44px);margin:10px 0 6px;font-weight:400;letter-spacing:.5px;background:linear-gradient(180deg,#FFF3C9 15%,#F5C64B 55%,#C98F12 85%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 2px 3px rgba(0,0,0,.55))}
+.sign .welcome{font-size:13px;letter-spacing:3px;color:var(--goldsoft);text-transform:uppercase;margin-top:8px}
+.sign p{color:#D8E0F4;font-size:15px}
+.director{flex:0 0 auto;text-align:center;color:#fff}
+.director .frame{width:170px;height:210px;margin:0 auto;border:3px solid var(--gold);outline:1px solid rgba(240,180,41,.45);outline-offset:5px;background:linear-gradient(135deg,#2C4A85,var(--navy));display:flex;align-items:center;justify-content:center;font-size:60px;overflow:hidden;box-shadow:0 10px 28px rgba(0,0,0,.35)}
+.director .frame img{width:100%;height:100%;object-fit:cover;object-position:top}
+.director .dn{font-weight:700;margin-top:12px;font-size:15.5px;color:var(--goldsoft)}
+.director .dp{font-size:13px;color:#C7D1EA}
 .sign .corner{position:absolute;width:14px;height:14px;border:2px solid var(--gold)}
 .sign .c1{top:-8px;left:-8px;border-right:none;border-bottom:none}
 .sign .c2{top:-8px;right:-8px;border-left:none;border-bottom:none}
@@ -170,8 +180,8 @@ footer b{color:var(--goldsoft)}
 <nav class="main"><div class="wrap">
   <a class="brand" href="#" onclick="go('home');return false">
     <div class="logo" id="logoBox">🏫</div>
-    <div><div class="nm" data-cfg="schoolName">โรงเรียนตัวอย่างวิทยา</div>
-    <div class="sub" data-cfg="motto">เรียนดี มีวินัย ใฝ่คุณธรรม</div></div>
+    <div><div class="nm" data-cfg="schoolName">โรงเรียนบ้านเหว่อฟากห้วยกุดตอเรือ</div>
+    <div class="sub" data-cfg="motto">ยิ้มง่ายไหว้สวย</div></div>
   </a>
   <button class="tab on" data-p="home" onclick="go('home')">หน้าแรก</button>
   <button class="tab" data-p="news" onclick="go('news')">ข่าวการศึกษา</button>
@@ -182,12 +192,20 @@ footer b{color:var(--goldsoft)}
   <button class="tab" data-p="admin" onclick="go('admin')">⚙️ ผู้ดูแล</button>
 </div></nav>
 
-<header class="hero"><div class="wrap">
+<header class="hero" id="heroBox"><div class="wrap">
+  <div class="hero-layout">
   <div class="sign">
     <span class="corner c1"></span><span class="corner c2"></span><span class="corner c3"></span><span class="corner c4"></span>
     <div class="crest" id="crestBox">🏫</div>
-    <h1 data-cfg="schoolName">โรงเรียนตัวอย่างวิทยา</h1>
-    <p><span data-cfg="motto">เรียนดี มีวินัย ใฝ่คุณธรรม</span> — <span data-cfg="district">สังกัด สพป.</span></p>
+    <h1 data-cfg="schoolName">โรงเรียนบ้านเหว่อฟากห้วยกุดตอเรือ</h1>
+    <p><span data-cfg="motto">ยิ้มง่ายไหว้สวย</span> — <span data-cfg="district">สังกัด สพป.</span></p>
+    <div class="welcome" id="welcomeLine" style="display:none"></div>
+  </div>
+  <div class="director" id="dirCard" style="display:none">
+    <div class="frame" id="dirFrame">👤</div>
+    <div class="dn" id="dirName"></div>
+    <div class="dp" id="dirPos"></div>
+  </div>
   </div>
   <div class="quick">
     <a href="#" onclick="go('results');return false">📊 ผลสอบ O-NET · NT · RT</a>
@@ -283,7 +301,7 @@ footer b{color:var(--goldsoft)}
 </main>
 
 <footer><div class="wrap">
-  <div><b data-cfg="schoolName">โรงเรียนตัวอย่างวิทยา</b><br><span data-cfg="address">ที่อยู่โรงเรียน</span><br>โทร <span data-cfg="phone">-</span></div>
+  <div><b data-cfg="schoolName">โรงเรียนบ้านเหว่อฟากห้วยกุดตอเรือ</b><br><span data-cfg="address">ที่อยู่โรงเรียน</span><br>โทร <span data-cfg="phone">-</span></div>
   <div style="text-align:right">อัพเดทข้อมูลอัตโนมัติจาก Google ชีต + ข่าว ศธ./สพฐ.<br>เว็บไซต์ระบบออโต้ · ฟรี 100%</div>
 </div></footer>
 <script>
@@ -293,12 +311,12 @@ footer b{color:var(--goldsoft)}
    ปล่อยว่าง "" = เว็บจะใช้ข้อมูลตัวอย่างเดโม่ให้ดูก่อน
    ================================================================ */
 const CONFIG = {
-  schoolName : "โรงเรียนตัวอย่างวิทยา",         // ← เปลี่ยนชื่อ รร. ได้ที่นี่ หรือในชีต settings (ชีตชนะเสมอ)
-  motto      : "เรียนดี มีวินัย ใฝ่คุณธรรม",
-  district   : "สพป.เลย เขต 1",
+  schoolName : "โรงเรียนบ้านเหว่อฟากห้วยกุดตอเรือ",         // ← เปลี่ยนชื่อ รร. ได้ที่นี่ หรือในชีต settings (ชีตชนะเสมอ)
+  motto      : "ยิ้มง่ายไหว้สวย",
+  district   : "สพป.เลย เขต 2",
   phone      : "0-4200-0000",
   email      : "school@example.ac.th",
-  address    : "ต.หนองหิน อ.หนองหิน จ.เลย",
+  address    : "หมู่ 8 ต.ทรายขาว อ.วังสะพุง จ.เลย",
   logoUrl    : "",                              // ลิงก์รูปตราโรงเรียน (เว้นว่าง = ใช้ 🏫)
   meetLink   : "https://meet.google.com/",      // ลิงก์ห้องประชุมประจำ รร.
   driveLink  : "https://drive.google.com/",     // โฟลเดอร์คลังไฟล์กลาง
@@ -306,7 +324,12 @@ const CONFIG = {
   calendarLink:"https://calendar.google.com/",
   announcements: ["รับสมัครนักเรียนใหม่ ปีการศึกษา 2569","ประชุมครูประจำเดือน ทุกวันศุกร์แรกของเดือน 15:30 น.","ผลสอบ O-NET ปีล่าสุดประกาศแล้ว ดูที่เมนูผลสัมฤทธิ์"],
   sheets: {   // ลิงก์ CSV ของแต่ละแท็บ (เผยแพร่ไปยังเว็บ → CSV)
-    settings:"", news:"", staff:"", gallery:"", results:"", files:""
+    settings:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTN6DfV3VqK7saYF87csvrD10Bhn6-Hefzdd--dKxNP3W4tW8mv06e1iJV7nN0KxLtiMvCKg-3MTrcO/pub?gid=0&single=true&output=csv",
+    news:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTN6DfV3VqK7saYF87csvrD10Bhn6-Hefzdd--dKxNP3W4tW8mv06e1iJV7nN0KxLtiMvCKg-3MTrcO/pub?gid=187597786&single=true&output=csv",
+    staff:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTN6DfV3VqK7saYF87csvrD10Bhn6-Hefzdd--dKxNP3W4tW8mv06e1iJV7nN0KxLtiMvCKg-3MTrcO/pub?gid=1516228154&single=true&output=csv",
+    gallery:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTN6DfV3VqK7saYF87csvrD10Bhn6-Hefzdd--dKxNP3W4tW8mv06e1iJV7nN0KxLtiMvCKg-3MTrcO/pub?gid=517409117&single=true&output=csv",
+    results:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTN6DfV3VqK7saYF87csvrD10Bhn6-Hefzdd--dKxNP3W4tW8mv06e1iJV7nN0KxLtiMvCKg-3MTrcO/pub?gid=1256300671&single=true&output=csv",
+    files:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTN6DfV3VqK7saYF87csvrD10Bhn6-Hefzdd--dKxNP3W4tW8mv06e1iJV7nN0KxLtiMvCKg-3MTrcO/pub?gid=1653215611&single=true&output=csv"
   },
   rssFeeds: [ // แหล่งข่าวการศึกษา ดึงอัตโนมัติ
     "https://moe360.blog/feed/",
@@ -404,6 +427,17 @@ function applySettings(){
   $("#qSend").href=$("#tSend").href=CONFIG.formLink;
   $("#tDrive").href=CONFIG.driveLink; $("#tCal").href=CONFIG.calendarLink;
   $("#tickerRun").innerHTML=CONFIG.announcements.map(a=>"<span>"+esc(a)+"</span>").join("");
+  /* แบนเนอร์ภาพพื้นหลัง (ตั้งค่า bannerImg ในชีต settings) */
+  if(CONFIG.bannerImg){const h=$("#heroBox");h.classList.add("hasimg");h.style.backgroundImage="url('"+CONFIG.bannerImg.replace(/'/g,"")+"')";}
+  /* การ์ดรูปผู้อำนวยการ (directorName / directorPos / directorPhoto ในชีต settings) */
+  if(CONFIG.directorName||CONFIG.directorPhoto){
+    $("#dirCard").style.display="block";
+    $("#dirName").textContent=CONFIG.directorName||"";
+    $("#dirPos").textContent=CONFIG.directorPos||"ผู้อำนวยการโรงเรียน";
+    if(CONFIG.directorPhoto)$("#dirFrame").innerHTML='<img src="'+esc(CONFIG.directorPhoto)+'" alt="ผู้อำนวยการ">';
+  }
+  /* ข้อความ Welcome ภาษาอังกฤษ (welcomeText ในชีต settings) */
+  if(CONFIG.welcomeText){$("#welcomeLine").style.display="block";$("#welcomeLine").textContent=CONFIG.welcomeText;}
 }
 
 /* ================= ข่าวโรงเรียน ================= */
