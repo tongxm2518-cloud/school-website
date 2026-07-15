@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เว็บไซต์โรงเรียน — ระบบอัตโนมัติ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chonburi&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --navy:#1C3667; --deep:#111F3E; --gold:#F0B429; --goldsoft:#FFDD87;
+  --paper:#F6F7FB; --card:#FFFFFF; --ink:#242B3D; --mut:#6B7285;
+  --line:#E2E7F2; --red:#C0392B; --green:#1E8E5A;
+  --shadow:0 2px 14px rgba(17,31,62,.08);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Sarabun',sans-serif;background:var(--paper);color:var(--ink);font-size:16px;line-height:1.65}
+img{max-width:100%}
+a{color:var(--navy)}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+.display{font-family:'Chonburi',serif}
+
+/* ===== แถบบนสุด ===== */
+.topbar{background:var(--deep);color:#B9C4DE;font-size:13px}
+.topbar .wrap{display:flex;justify-content:space-between;align-items:center;padding:6px 20px}
+.topbar b{color:var(--goldsoft);font-weight:600}
+
+/* ===== เมนู ===== */
+nav.main{background:var(--navy);position:sticky;top:0;z-index:50;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+nav.main .wrap{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:0 20px}
+.brand{display:flex;align-items:center;gap:10px;padding:10px 0;margin-right:auto;color:#fff;text-decoration:none}
+.brand .logo{width:42px;height:42px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:22px;border:2px solid var(--goldsoft);flex-shrink:0;overflow:hidden}
+.brand .logo img{width:100%;height:100%;object-fit:cover}
+.brand .nm{font-weight:700;font-size:17px;line-height:1.2}
+.brand .sub{font-size:11.5px;color:#AEBBDD;font-weight:400}
+nav.main button.tab{background:none;border:none;color:#D5DDF0;font-family:'Sarabun';font-size:15px;font-weight:500;padding:16px 13px;cursor:pointer;border-bottom:3px solid transparent;transition:.2s}
+nav.main button.tab:hover{color:#fff}
+nav.main button.tab.on{color:var(--goldsoft);border-bottom-color:var(--gold)}
+
+/* ===== ฮีโร่ : ป้ายโรงเรียน ===== */
+.hero{background:linear-gradient(160deg,var(--navy) 0%,var(--deep) 90%);padding:52px 0 60px;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(600px 300px at 85% 10%,rgba(240,180,41,.14),transparent)}
+.sign{position:relative;max-width:780px;margin:0 auto;text-align:center;border:3px solid var(--gold);outline:1px solid rgba(240,180,41,.45);outline-offset:7px;padding:38px 30px 32px;color:#fff}
+.sign .crest{font-size:44px;line-height:1}
+.sign h1{font-family:'Chonburi';font-size:clamp(28px,4.6vw,46px);color:var(--goldsoft);margin:10px 0 6px;font-weight:400;letter-spacing:.5px}
+.sign p{color:#C7D1EA;font-size:15px}
+.sign .corner{position:absolute;width:14px;height:14px;border:2px solid var(--gold)}
+.sign .c1{top:-8px;left:-8px;border-right:none;border-bottom:none}
+.sign .c2{top:-8px;right:-8px;border-left:none;border-bottom:none}
+.sign .c3{bottom:-8px;left:-8px;border-right:none;border-top:none}
+.sign .c4{bottom:-8px;right:-8px;border-left:none;border-top:none}
+.hero .quick{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:26px;position:relative}
+.hero .quick a{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.22);color:#fff;text-decoration:none;padding:9px 18px;border-radius:99px;font-size:14px;transition:.2s}
+.hero .quick a:hover{background:var(--gold);color:var(--deep);border-color:var(--gold)}
+
+/* ===== ตัววิ่งประกาศ ===== */
+.ticker{background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;overflow:hidden}
+.ticker .lbl{background:var(--red);color:#fff;font-weight:700;font-size:13.5px;padding:9px 16px;white-space:nowrap;flex-shrink:0}
+.ticker .rail{flex:1;overflow:hidden;position:relative}
+.ticker .run{display:inline-block;white-space:nowrap;padding:9px 0;animation:run 30s linear infinite;font-size:14.5px;color:var(--ink)}
+.ticker .run span{margin:0 34px;color:var(--navy)}
+.ticker .run span::before{content:"📌 ";}
+@keyframes run{from{transform:translateX(100vw)}to{transform:translateX(-100%)}}
+@media (prefers-reduced-motion: reduce){.ticker .run{animation:none;padding-left:16px}}
+
+/* ===== เพจ / เซคชัน ===== */
+.page{display:none;padding:36px 0 60px}
+.page.on{display:block;animation:fade .35s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1}}
+.sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:6px;flex-wrap:wrap}
+.sec-head h2{font-family:'Chonburi';font-weight:400;font-size:26px;color:var(--navy)}
+.sec-head .rule{flex:1;height:2px;background:linear-gradient(90deg,var(--gold),transparent);min-width:60px}
+.sec-sub{color:var(--mut);font-size:14px;margin-bottom:22px}
+.auto-badge{display:inline-flex;align-items:center;gap:5px;background:#E9F6EF;color:var(--green);font-size:12.5px;font-weight:600;padding:3px 11px;border-radius:99px;border:1px solid #C9E9D8}
+.auto-badge::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 1.6s infinite}
+@keyframes pulse{50%{opacity:.35}}
+
+/* ===== การ์ด ===== */
+.grid{display:grid;gap:18px}
+.g3{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.g4{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;transition:.2s}
+.card:hover{transform:translateY(-3px);box-shadow:0 8px 22px rgba(17,31,62,.13)}
+.card .bd{padding:16px 18px}
+.card h3{font-size:16.5px;color:var(--navy);margin-bottom:6px;line-height:1.45}
+.card .meta{font-size:12.5px;color:var(--mut);display:flex;gap:12px;flex-wrap:wrap}
+.card p.desc{font-size:14px;color:#4A5268;margin-top:8px}
+.chip{display:inline-block;background:#EEF2FB;color:var(--navy);font-size:12px;font-weight:600;padding:2px 10px;border-radius:99px}
+.chip.gold{background:#FFF4D6;color:#8A6100}
+.newsimg{height:150px;background:linear-gradient(135deg,var(--navy),#3A5A9B);display:flex;align-items:center;justify-content:center;font-size:44px;color:var(--goldsoft)}
+a.card-link{text-decoration:none;color:inherit;display:block}
+
+/* ===== บุคลากร ===== */
+.person{text-align:center;padding:24px 16px 18px}
+.avatar{width:110px;height:110px;border-radius:50%;margin:0 auto 12px;background:linear-gradient(135deg,var(--navy),#41639F);color:var(--goldsoft);display:flex;align-items:center;justify-content:center;font-family:'Chonburi';font-size:34px;border:3px solid var(--gold);overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.person .nm{font-weight:700;font-size:16px;color:var(--ink)}
+.person .pos{font-size:13.5px;color:var(--mut);margin-top:2px}
+.person .dept{margin-top:9px}
+
+/* ===== ตัวกรอง ===== */
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 22px}
+.filters button{background:#fff;border:1.5px solid var(--line);border-radius:99px;padding:6px 16px;font-family:'Sarabun';font-size:13.5px;font-weight:600;color:var(--mut);cursor:pointer;transition:.15s}
+.filters button:hover{border-color:var(--navy);color:var(--navy)}
+.filters button.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.filters .sep{align-self:center;color:var(--line)}
+
+/* ===== แกลเลอรี ===== */
+.ph{position:relative;height:190px;background:linear-gradient(135deg,#2C4A85,var(--navy));display:flex;align-items:center;justify-content:center;font-size:52px}
+.ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ph .yr{position:absolute;top:10px;right:10px;background:rgba(17,31,62,.78);color:var(--goldsoft);font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px}
+
+/* ===== กราฟ ===== */
+.chart-card{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:20px 22px;margin-bottom:20px}
+.chart-card h3{font-size:16px;color:var(--navy);margin-bottom:4px}
+.chart-card .note{font-size:12.5px;color:var(--mut);margin-bottom:12px}
+.chart-wrap{position:relative;height:320px}
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:22px}
+.stat{background:#fff;border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:12px;padding:14px 16px}
+.stat .v{font-family:'Chonburi';font-size:26px;color:var(--navy)}
+.stat .l{font-size:13px;color:var(--mut)}
+.stat .d{font-size:12.5px;font-weight:700}
+.up{color:var(--green)}.down{color:var(--red)}
+
+/* ===== คลังไฟล์ ===== */
+.tool-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:16px}
+.tool{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;box-shadow:var(--shadow);text-decoration:none;color:inherit;display:flex;gap:14px;align-items:flex-start;transition:.2s}
+.tool:hover{transform:translateY(-3px);border-color:var(--gold)}
+.tool .ic{width:46px;height:46px;border-radius:12px;background:#EEF2FB;display:flex;align-items:center;justify-content:center;font-size:23px;flex-shrink:0}
+.tool b{color:var(--navy);font-size:15px}
+.tool small{color:var(--mut);display:block;margin-top:3px;font-size:13px}
+.filelist{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;margin-top:22px}
+.filelist .fh{background:#F2F5FC;padding:11px 18px;font-weight:700;color:var(--navy);font-size:14px;border-bottom:1px solid var(--line)}
+.frow{display:flex;align-items:center;gap:12px;padding:11px 18px;border-bottom:1px solid #EEF1F8;font-size:14.5px;text-decoration:none;color:var(--ink)}
+.frow:hover{background:#FAFBFE}
+.frow:last-child{border-bottom:none}
+.frow .fi{font-size:19px}
+.frow .cat{margin-left:auto}
+
+/* ===== คู่มือผู้ดูแล ===== */
+.steps{counter-reset:s}
+.step{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px 18px 66px;margin-bottom:14px;position:relative;box-shadow:var(--shadow)}
+.step::before{counter-increment:s;content:counter(s);position:absolute;left:18px;top:16px;width:32px;height:32px;border-radius:50%;background:var(--gold);color:var(--deep);font-weight:700;display:flex;align-items:center;justify-content:center}
+.step b{color:var(--navy)}
+.step code{background:#F0F3FA;padding:2px 7px;border-radius:6px;font-size:13px;color:var(--red);word-break:break-all}
+.callout{background:#FFF9E8;border:1px solid #F2E2B0;border-radius:12px;padding:14px 18px;font-size:14px;margin:18px 0}
+
+/* ===== ฟุตเตอร์ ===== */
+footer{background:var(--deep);color:#9FACCB;padding:34px 0;margin-top:20px;font-size:14px}
+footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+footer b{color:var(--goldsoft)}
+.loadmsg{color:var(--mut);font-size:14px;padding:26px;text-align:center}
+@media(max-width:640px){
+  nav.main .wrap{padding:0 10px}
+  nav.main button.tab{padding:12px 9px;font-size:13.5px}
+  .brand .nm{font-size:14.5px}
+  .chart-wrap{height:260px}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="wrap">
+  <div>📞 <span data-cfg="phone">0-0000-0000</span> &nbsp;•&nbsp; ✉️ <span data-cfg="email">school@email.com</span></div>
+  <div>สังกัด <b data-cfg="district">สพป./สพม. ...</b></div>
+</div></div>
+
+<nav class="main"><div class="wrap">
+  <a class="brand" href="#" onclick="go('home');return false">
+    <div class="logo" id="logoBox">🏫</div>
+    <div><div class="nm" data-cfg="schoolName">โรงเรียนบ้านเหว่อฟากห้วยกุดตอเรือ</div>
+    <div class="sub" data-cfg="motto">ยิ้มง่ายไหว้สวย</div></div>
+  </a>
+  <button class="tab on" data-p="home" onclick="go('home')">หน้าแรก</button>
+  <button class="tab" data-p="news" onclick="go('news')">ข่าวการศึกษา</button>
+  <button class="tab" data-p="staff" onclick="go('staff')">บุคลากร</button>
+  <button class="tab" data-p="gallery" onclick="go('gallery')">กิจกรรม</button>
+  <button class="tab" data-p="results" onclick="go('results')">ผลสัมฤทธิ์</button>
+  <button class="tab" data-p="library" onclick="go('library')">คลังไฟล์·สื่อ</button>
+  <button class="tab" data-p="admin" onclick="go('admin')">⚙️ ผู้ดูแล</button>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <div class="sign">
+    <span class="corner c1"></span><span class="corner c2"></span><span class="corner c3"></span><span class="corner c4"></span>
+    <div class="crest" id="crestBox">🏫</div>
+    <h1 data-cfg="schoolName">โรงเรียนบ้านเหว่อฟากห้วยกุดตอเรือ</h1>
+    <p><span data-cfg="motto">ยิ้มง่ายไหว้สวย</span> — <span data-cfg="district">สังกัด สพป.</span></p>
+  </div>
+  <div class="quick">
+    <a href="#" onclick="go('results');return false">📊 ผลสอบ O-NET · NT · RT</a>
+    <a href="#" onclick="go('library');return false">📁 คลังไฟล์ครู</a>
+    <a href="#" id="qMeet" target="_blank">🎥 ห้องประชุมออนไลน์</a>
+    <a href="#" id="qSend" target="_blank">📤 ส่งไฟล์งาน</a>
+  </div>
+</div></header>
+
+<div class="ticker">
+  <div class="lbl">ประกาศ</div>
+  <div class="rail"><div class="run" id="tickerRun"><span>ยินดีต้อนรับสู่เว็บไซต์โรงเรียน</span></div></div>
+</div>
+
+<main class="wrap">
+
+<!-- ============ หน้าแรก ============ -->
+<section class="page on" id="pg-home">
+  <div class="sec-head"><h2>ข่าวประชาสัมพันธ์โรงเรียน</h2><div class="rule"></div><span class="auto-badge">อัพเดทจาก Google ชีตอัตโนมัติ</span></div>
+  <p class="sec-sub">ครูเพิ่มข่าวในชีต → ขึ้นเว็บทันที ไม่ต้องแก้เว็บ</p>
+  <div class="grid g3" id="schoolNews"></div>
+
+  <div style="height:38px"></div>
+  <div class="sec-head"><h2>ข่าวการศึกษาวันนี้</h2><div class="rule"></div><span class="auto-badge">ดึงจาก ศธ. / สพฐ. อัตโนมัติทุกวัน</span></div>
+  <p class="sec-sub">ระบบดึงข่าวล่าสุดจากกระทรวงศึกษาธิการและ สพฐ. ให้เองทุกครั้งที่เปิดเว็บ</p>
+  <div class="grid g3" id="eduNewsHome"><div class="loadmsg">⏳ กำลังดึงข่าวการศึกษาล่าสุด...</div></div>
+</section>
+
+<!-- ============ ข่าวการศึกษา ============ -->
+<section class="page" id="pg-news">
+  <div class="sec-head"><h2>ข่าวการศึกษา ศธ. · สพฐ.</h2><div class="rule"></div><span class="auto-badge">อัตโนมัติ 100%</span></div>
+  <p class="sec-sub">ดึงข่าวสดจากเว็บกระทรวงศึกษาธิการ (ศธ.360 องศา) และ สพฐ. — ไม่ต้องมีใครมาอัพเดทเลย</p>
+  <div class="grid g3" id="eduNewsFull"><div class="loadmsg">⏳ กำลังดึงข่าว...</div></div>
+</section>
+
+<!-- ============ บุคลากร ============ -->
+<section class="page" id="pg-staff">
+  <div class="sec-head"><h2>คณะผู้บริหารและบุคลากร</h2><div class="rule"></div><span class="auto-badge">แก้ชื่อ/รูป ผ่าน Google ชีต</span></div>
+  <p class="sec-sub">ย้ายโรงเรียน เปลี่ยน ผอ. ครูย้ายเข้า–ออก แค่แก้ในชีต รูปและชื่อเปลี่ยนเอง</p>
+  <div class="filters" id="staffFilters"></div>
+  <div class="grid g4" id="staffGrid"></div>
+</section>
+
+<!-- ============ กิจกรรม ============ -->
+<section class="page" id="pg-gallery">
+  <div class="sec-head"><h2>ภาพกิจกรรมโรงเรียน</h2><div class="rule"></div><span class="auto-badge">แยกหมวด · ปี พ.ศ. อัตโนมัติ</span></div>
+  <p class="sec-sub">วางลิงก์รูป/อัลบั้มในชีต ระบบจัดหมวดหมู่และปีให้เอง กดกรองได้ทันที</p>
+  <div class="filters" id="galFilters"></div>
+  <div class="grid g3" id="galGrid"></div>
+</section>
+
+<!-- ============ ผลสัมฤทธิ์ ============ -->
+<section class="page" id="pg-results">
+  <div class="sec-head"><h2>ผลการทดสอบระดับชาติ</h2><div class="rule"></div><span class="auto-badge">กราฟวาดเองจากชีต</span></div>
+  <p class="sec-sub">กรอกคะแนนปีล่าสุดลงชีต → กราฟเปรียบเทียบทุกตัวอัพเดทเองทันที (O-NET · NT · RT · เทียบระดับประเทศ)</p>
+  <div class="stat-row" id="statRow"></div>
+  <div class="chart-card"><h3>O-NET ป.6 — คะแนนเฉลี่ยรายวิชา เทียบระดับประเทศ (ปีล่าสุด)</h3><div class="note">โรงเรียน vs ประเทศ</div><div class="chart-wrap"><canvas id="chOnet"></canvas></div></div>
+  <div class="chart-card"><h3>แนวโน้ม O-NET เฉลี่ยรวม ย้อนหลัง</h3><div class="note">พัฒนาการของโรงเรียนเทียบค่าเฉลี่ยประเทศ</div><div class="chart-wrap"><canvas id="chTrend"></canvas></div></div>
+  <div class="chart-card"><h3>NT ป.3 และ RT ป.1</h3><div class="note">ความสามารถด้านคณิตศาสตร์ ภาษาไทย และการอ่าน</div><div class="chart-wrap"><canvas id="chNtrt"></canvas></div></div>
+</section>
+
+<!-- ============ คลังไฟล์ ============ -->
+<section class="page" id="pg-library">
+  <div class="sec-head"><h2>คลังไฟล์ · สื่อการสอน · งานฝ่าย</h2><div class="rule"></div><span class="auto-badge">ทำงานร่วมกันทั้งโรงเรียน</span></div>
+  <p class="sec-sub">ศูนย์กลางลดงานครูและ ผอ. — ส่งไฟล์ แชร์ไฟล์ ประชุมออนไลน์ เก็บเข้าคลังอัตโนมัติ ทุกคนใช้ร่วมกันได้</p>
+  <div class="tool-grid">
+    <a class="tool" id="tDrive" target="_blank"><div class="ic">📁</div><div><b>คลังไฟล์กลาง (Google Drive)</b><small>เอกสาร คำสั่ง แผนการสอน เก็บรวมที่เดียว ค้นหาได้</small></div></a>
+    <a class="tool" id="tSend" target="_blank"><div class="ic">📤</div><div><b>ส่งไฟล์งาน (Google ฟอร์ม)</b><small>ครูส่งงาน → ไฟล์วิ่งเข้าโฟลเดอร์และชีตสรุปเองอัตโนมัติ</small></div></a>
+    <a class="tool" id="tMeet" target="_blank"><div class="ic">🎥</div><div><b>ประชุมออนไลน์ (Meet)</b><small>ลิงก์ห้องประชุมประจำโรงเรียน กดเข้าได้ทันที</small></div></a>
+    <a class="tool" id="tCal" target="_blank"><div class="ic">📅</div><div><b>ปฏิทินโรงเรียน</b><small>นัดประชุม/กิจกรรม แจ้งเตือนครูอัตโนมัติ</small></div></a>
+  </div>
+  <div class="filelist">
+    <div class="fh">📚 สื่อการสอนและเอกสารล่าสุด (จากชีต — เพิ่มแถวเดียวขึ้นเว็บเลย)</div>
+    <div id="fileRows"></div>
+  </div>
+</section>
+
+<!-- ============ ผู้ดูแล ============ -->
+<section class="page" id="pg-admin">
+  <div class="sec-head"><h2>คู่มือผู้ดูแลระบบ</h2><div class="rule"></div></div>
+  <p class="sec-sub">เว็บนี้ "ไม่ต้องแก้โค้ด" ในการใช้งานประจำวัน — ทุกอย่างควบคุมจาก Google ชีต 1 ไฟล์</p>
+  <div class="callout">💡 <b>ย้ายโรงเรียนใหม่?</b> แก้แค่แถว <code>schoolName</code> ในชีตแท็บ <code>settings</code> ชื่อโรงเรียนจะเปลี่ยนทั้งเว็บ (ป้ายหน้าเว็บ เมนู ฟุตเตอร์) ภายใน 5 นาที</div>
+  <div class="steps">
+    <div class="step"><b>สร้าง Google ชีต 1 ไฟล์</b> มี 6 แท็บ: <code>settings</code>, <code>news</code>, <code>staff</code>, <code>gallery</code>, <code>results</code>, <code>files</code> (โครงสร้างคอลัมน์อยู่ในไฟล์คู่มือที่แนบมา)</div>
+    <div class="step"><b>เผยแพร่ชีต:</b> ไฟล์ → แชร์ → เผยแพร่ไปยังเว็บ → เลือกทีละแท็บ เป็น <code>.csv</code> แล้วคัดลอกลิงก์</div>
+    <div class="step"><b>วางลิงก์ในไฟล์เว็บ</b> ตรงส่วน <code>CONFIG.sheets</code> (แก้ครั้งเดียวครั้งแรกเท่านั้น)</div>
+    <div class="step"><b>อัพโหลดเว็บฟรี:</b> Netlify Drop (ลากไฟล์วาง เสร็จใน 10 วินาที) หรือ GitHub Pages — ได้ลิงก์เว็บจริงใช้ได้ทันที</div>
+    <div class="step"><b>ใช้งานประจำวัน:</b> ครูแก้ชีตอย่างเดียว — เพิ่มข่าว เพิ่มรูป กรอกคะแนน เว็บอัพเดทเองทั้งหมด ✅</div>
+  </div>
+  <div class="callout">🤖 <b>ระบบอัตโนมัติที่ทำงานอยู่:</b> ข่าว ศธ./สพฐ. ดึงสดทุกวัน • กราฟผลสอบวาดใหม่เองเมื่อข้อมูลเปลี่ยน • แกลเลอรีจัดหมวด/ปีเอง • ฟอร์มส่งไฟล์เก็บเข้า Drive เอง</div>
+</section>
+
+</main>
+
+<footer><div class="wrap">
+  <div><b data-cfg="schoolName">โรงเรียนบ้านเหว่อฟากห้วยกุดตอเรือ</b><br><span data-cfg="address">ที่อยู่โรงเรียน</span><br>โทร <span data-cfg="phone">-</span></div>
+  <div style="text-align:right">อัพเดทข้อมูลอัตโนมัติจาก Google ชีต + ข่าว ศธ./สพฐ.<br>เว็บไซต์ระบบออโต้ · ฟรี 100%</div>
+</div></footer>
+<script>
+/* ================================================================
+   ⚙️ CONFIG — จุดเดียวที่ต้องตั้งค่า (ครั้งแรกครั้งเดียว)
+   วางลิงก์ CSV จาก "ไฟล์ → แชร์ → เผยแพร่ไปยังเว็บ" ของ Google ชีต
+   ปล่อยว่าง "" = เว็บจะใช้ข้อมูลตัวอย่างเดโม่ให้ดูก่อน
+   ================================================================ */
+const CONFIG = {
+  schoolName : "โรงเรียนบ้านเหว่อฟากห้วยกุดตอเรือ",         // ← เปลี่ยนชื่อ รร. ได้ที่นี่ หรือในชีต settings (ชีตชนะเสมอ)
+  motto      : "ยิ้มง่ายไหว้สวย",
+  district   : "สพป.เลย เขต 2",
+  phone      : "0-4200-0000",
+  email      : "school@example.ac.th",
+  address    : "หมู่ 8 ต.ทรายขาว อ.วังสะพุง จ.เลย",
+  logoUrl    : "",                              // ลิงก์รูปตราโรงเรียน (เว้นว่าง = ใช้ 🏫)
+  meetLink   : "https://meet.google.com/",      // ลิงก์ห้องประชุมประจำ รร.
+  driveLink  : "https://drive.google.com/",     // โฟลเดอร์คลังไฟล์กลาง
+  formLink   : "https://forms.google.com/",     // ฟอร์มส่งไฟล์งาน
+  calendarLink:"https://calendar.google.com/",
+  announcements: ["รับสมัครนักเรียนใหม่ ปีการศึกษา 2569","ประชุมครูประจำเดือน ทุกวันศุกร์แรกของเดือน 15:30 น.","ผลสอบ O-NET ปีล่าสุดประกาศแล้ว ดูที่เมนูผลสัมฤทธิ์"],
+  sheets: {   // ลิงก์ CSV ของแต่ละแท็บ (เผยแพร่ไปยังเว็บ → CSV)
+    settings:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTN6DfV3VqK7saYF87csvrD10Bhn6-Hefzdd--dKxNP3W4tW8mv06e1iJV7nN0KxLtiMvCKg-3MTrcO/pub?gid=0&single=true&output=csv",
+    news:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTN6DfV3VqK7saYF87csvrD10Bhn6-Hefzdd--dKxNP3W4tW8mv06e1iJV7nN0KxLtiMvCKg-3MTrcO/pub?gid=187597786&single=true&output=csv",
+    staff:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTN6DfV3VqK7saYF87csvrD10Bhn6-Hefzdd--dKxNP3W4tW8mv06e1iJV7nN0KxLtiMvCKg-3MTrcO/pub?gid=1516228154&single=true&output=csv",
+    gallery:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTN6DfV3VqK7saYF87csvrD10Bhn6-Hefzdd--dKxNP3W4tW8mv06e1iJV7nN0KxLtiMvCKg-3MTrcO/pub?gid=517409117&single=true&output=csv",
+    results:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTN6DfV3VqK7saYF87csvrD10Bhn6-Hefzdd--dKxNP3W4tW8mv06e1iJV7nN0KxLtiMvCKg-3MTrcO/pub?gid=1256300671&single=true&output=csv",
+    files:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTN6DfV3VqK7saYF87csvrD10Bhn6-Hefzdd--dKxNP3W4tW8mv06e1iJV7nN0KxLtiMvCKg-3MTrcO/pub?gid=1653215611&single=true&output=csv"
+  },
+  rssFeeds: [ // แหล่งข่าวการศึกษา ดึงอัตโนมัติ
+    "https://moe360.blog/feed/",
+    "https://www.obec.go.th/feed"
+  ]
+};
+
+/* ============ ข้อมูลเดโม่ (แสดงเมื่อยังไม่เชื่อมชีต) ============ */
+const DEMO = {
+news:[
+ {title:"เปิดภาคเรียนที่ 1/2569 วันที่ 16 พฤษภาคม",date:"10 พ.ค. 2569",cat:"ประกาศ",desc:"ขอให้นักเรียนทุกคนมาโรงเรียนตามปกติ พร้อมอุปกรณ์การเรียน",icon:"📢",link:""},
+ {title:"กิจกรรมวันไหว้ครู ประจำปีการศึกษา 2569",date:"12 มิ.ย. 2569",cat:"กิจกรรม",desc:"ขอเชิญนักเรียนและผู้ปกครองร่วมพิธีไหว้ครู ณ หอประชุมโรงเรียน",icon:"🙏",link:""},
+ {title:"รับสมัครครูอัตราจ้าง วิชาเอกภาษาอังกฤษ 1 อัตรา",date:"1 ก.ค. 2569",cat:"รับสมัคร",desc:"ยื่นใบสมัครได้ที่ห้องธุรการ ภายในวันที่ 15 ก.ค. 2569",icon:"📋",link:""}
+],
+staff:[
+ {name:"นายทวิทย์ ตัวอย่าง",pos:"ผู้อำนวยการโรงเรียน",dept:"ฝ่ายบริหาร",photo:""},
+ {name:"นางสมศรี ใจดี",pos:"รองผู้อำนวยการ",dept:"ฝ่ายบริหาร",photo:""},
+ {name:"นางกานดา เก่งงาน",pos:"หัวหน้าฝ่ายวิชาการ",dept:"ฝ่ายวิชาการ",photo:""},
+ {name:"นายประหยัด รอบคอบ",pos:"หัวหน้าฝ่ายงบประมาณ",dept:"ฝ่ายงบประมาณ",photo:""},
+ {name:"นางบุคลา พร้อมเพรียง",pos:"หัวหน้าฝ่ายบุคคล",dept:"ฝ่ายบุคคล",photo:""},
+ {name:"นายทั่วไป ครบเครื่อง",pos:"หัวหน้าฝ่ายบริหารทั่วไป",dept:"ฝ่ายบริหารทั่วไป",photo:""},
+ {name:"นางสาวไอที ทันสมัย",pos:"ครู ICT / ผู้ดูแลเว็บไซต์",dept:"ฝ่ายวิชาการ",photo:""},
+ {name:"นายกีฬา แข็งแรง",pos:"ครูพลศึกษา",dept:"ฝ่ายบริหารทั่วไป",photo:""}
+],
+gallery:[
+ {title:"พิธีไหว้ครู",cat:"วันสำคัญ",year:"2569",icon:"🙏",img:"",link:""},
+ {title:"กีฬาสีภายใน",cat:"กีฬา",year:"2569",icon:"🏅",img:"",link:""},
+ {title:"ค่ายวิชาการ STEM",cat:"วิชาการ",year:"2569",icon:"🔬",img:"",link:""},
+ {title:"วันเด็กแห่งชาติ",cat:"วันสำคัญ",year:"2568",icon:"🎈",img:"",link:""},
+ {title:"ทัศนศึกษา ป.4-6",cat:"ทัศนศึกษา",year:"2568",icon:"🚌",img:"",link:""},
+ {title:"แห่เทียนพรรษา",cat:"วันสำคัญ",year:"2568",icon:"🕯️",img:"",link:""},
+ {title:"กีฬากลุ่มโรงเรียน",cat:"กีฬา",year:"2567",icon:"⚽",img:"",link:""},
+ {title:"นิทรรศการวิชาการ Open House",cat:"วิชาการ",year:"2567",icon:"🎓",img:"",link:""}
+],
+/* results: test=ชุดข้อมูล, year=ปี พ.ศ., subject=วิชา, school=คะแนน รร., national=คะแนนประเทศ */
+results:[
+ {test:"O-NET",year:"2568",subject:"ภาษาไทย",school:58.4,national:54.2},
+ {test:"O-NET",year:"2568",subject:"คณิตศาสตร์",school:34.6,national:31.5},
+ {test:"O-NET",year:"2568",subject:"วิทยาศาสตร์",school:41.8,national:39.7},
+ {test:"O-NET",year:"2568",subject:"ภาษาอังกฤษ",school:38.2,national:37.9},
+ {test:"O-NET",year:"2567",subject:"เฉลี่ยรวม",school:40.1,national:39.4},
+ {test:"O-NET",year:"2566",subject:"เฉลี่ยรวม",school:37.9,national:38.8},
+ {test:"O-NET",year:"2568",subject:"เฉลี่ยรวม",school:43.3,national:40.8},
+ {test:"NT",year:"2568",subject:"คณิตศาสตร์",school:52.7,national:49.1},
+ {test:"NT",year:"2568",subject:"ภาษาไทย",school:60.3,national:55.8},
+ {test:"RT",year:"2568",subject:"อ่านออกเสียง",school:78.5,national:74.2},
+ {test:"RT",year:"2568",subject:"อ่านรู้เรื่อง",school:75.1,national:72.6}
+],
+files:[
+ {name:"แผนการสอน Active Learning ทุกกลุ่มสาระ",cat:"สื่อการสอน",icon:"📘",link:"#"},
+ {name:"แบบฝึกอ่านเขียน ป.1 (RT)",cat:"สื่อการสอน",icon:"📗",link:"#"},
+ {name:"คลังข้อสอบ O-NET ย้อนหลัง + เฉลย",cat:"ข้อสอบ",icon:"📝",link:"#"},
+ {name:"แบบฟอร์ม ปพ.5 / ปพ.6 อัตโนมัติ",cat:"งานวิชาการ",icon:"📊",link:"#"},
+ {name:"รายงานการประชุมครู (เก็บอัตโนมัติทุกเดือน)",cat:"งานบริหาร",icon:"🗂️",link:"#"},
+ {name:"SAR รายงานประเมินตนเองของสถานศึกษา",cat:"งานประกัน",icon:"📑",link:"#"}
+]};
+
+/* ================= เครื่องมือหลัก ================= */
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+const esc=t=>String(t??"").replace(/[<>&"]/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;"}[c]));
+
+function go(p){
+  $$(".page").forEach(x=>x.classList.remove("on"));
+  $("#pg-"+p).classList.add("on");
+  $$("nav.main .tab").forEach(b=>b.classList.toggle("on",b.dataset.p===p));
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+/* อ่าน CSV จาก Google ชีต */
+function parseCSV(text){
+  const rows=[];let row=[],cur="",q=false;
+  for(let i=0;i<text.length;i++){const c=text[i];
+    if(q){ if(c=='"'){ if(text[i+1]=='"'){cur+='"';i++;} else q=false; } else cur+=c; }
+    else{ if(c=='"')q=true; else if(c==','){row.push(cur);cur="";}
+      else if(c=='\n'||c=='\r'){ if(c=='\r'&&text[i+1]=='\n')i++; row.push(cur);cur=""; if(row.some(x=>x.trim()!==""))rows.push(row); row=[]; }
+      else cur+=c; } }
+  if(cur!==""||row.length){row.push(cur); if(row.some(x=>x.trim()!==""))rows.push(row);}
+  if(!rows.length)return[];
+  const head=rows[0].map(h=>h.trim().toLowerCase());
+  return rows.slice(1).map(r=>Object.fromEntries(head.map((h,i)=>[h,(r[i]||"").trim()])));
+}
+async function loadSheet(key){
+  const url=CONFIG.sheets[key];
+  if(!url)return null;
+  try{const r=await fetch(url);if(!r.ok)throw 0;return parseCSV(await r.text());}
+  catch(e){console.warn("โหลดชีต "+key+" ไม่ได้ ใช้ข้อมูลเดโม่แทน");return null;}
+}
+
+/* ================= ตั้งค่าโรงเรียน (เปลี่ยนชื่อ รร. ทั้งเว็บ) ================= */
+function applySettings(){
+  document.title=CONFIG.schoolName+" — เว็บไซต์โรงเรียน";
+  $$("[data-cfg]").forEach(el=>{const k=el.dataset.cfg; if(CONFIG[k])el.textContent=CONFIG[k];});
+  if(CONFIG.logoUrl){$("#logoBox").innerHTML='<img src="'+esc(CONFIG.logoUrl)+'" alt="ตราโรงเรียน">';$("#crestBox").innerHTML='<img src="'+esc(CONFIG.logoUrl)+'" style="width:74px;height:74px;border-radius:50%;object-fit:cover;border:2px solid var(--gold)" alt="">';}
+  $("#qMeet").href=$("#tMeet").href=CONFIG.meetLink;
+  $("#qSend").href=$("#tSend").href=CONFIG.formLink;
+  $("#tDrive").href=CONFIG.driveLink; $("#tCal").href=CONFIG.calendarLink;
+  $("#tickerRun").innerHTML=CONFIG.announcements.map(a=>"<span>"+esc(a)+"</span>").join("");
+}
+
+/* ================= ข่าวโรงเรียน ================= */
+function renderSchoolNews(list){
+  $("#schoolNews").innerHTML=list.map(n=>{
+    const inner=`<div class="newsimg">${esc(n.icon||"📰")}</div><div class="bd">
+      <span class="chip gold">${esc(n.cat||"ข่าว")}</span>
+      <h3 style="margin-top:8px">${esc(n.title)}</h3>
+      <div class="meta">🗓️ ${esc(n.date||"")}</div>
+      <p class="desc">${esc(n.desc||"")}</p></div>`;
+    return n.link?`<a class="card card-link" href="${esc(n.link)}" target="_blank">${inner}</a>`:`<div class="card">${inner}</div>`;
+  }).join("");
+}
+
+/* ================= ข่าวการศึกษาอัตโนมัติ (RSS) ================= */
+async function loadEduNews(){
+  let items=[];
+  for(const feed of CONFIG.rssFeeds){
+    try{
+      const r=await fetch("https://api.rss2json.com/v1/api.json?rss_url="+encodeURIComponent(feed));
+      const d=await r.json();
+      if(d.status==="ok")items.push(...d.items.map(it=>({title:it.title,link:it.link,date:it.pubDate?it.pubDate.slice(0,10):"",src:d.feed&&d.feed.title||"ข่าวการศึกษา",thumb:it.thumbnail||(it.enclosure&&it.enclosure.link)||""})));
+    }catch(e){}
+  }
+  items.sort((a,b)=>b.date.localeCompare(a.date));
+  const render=list=>list.map(n=>`<a class="card card-link" href="${esc(n.link)}" target="_blank">
+     <div class="newsimg">${n.thumb?`<img src="${esc(n.thumb)}" style="width:100%;height:100%;object-fit:cover" alt="">`:"📰"}</div>
+     <div class="bd"><span class="chip">${esc(n.src)}</span><h3 style="margin-top:8px">${esc(n.title)}</h3>
+     <div class="meta">🗓️ ${esc(n.date)}</div></div></a>`).join("");
+  if(items.length){
+    $("#eduNewsHome").innerHTML=render(items.slice(0,3));
+    $("#eduNewsFull").innerHTML=render(items.slice(0,18));
+  }else{
+    const msg=`<div class="loadmsg">📡 จะดึงข่าว ศธ./สพฐ. อัตโนมัติเมื่อเว็บออนไลน์จริง (อัพโหลดขึ้น Netlify/GitHub Pages แล้วเปิดดู)<br>ตอนนี้แสดงตัวอย่างการทำงานเท่านั้น</div>`;
+    $("#eduNewsHome").innerHTML=msg; $("#eduNewsFull").innerHTML=msg;
+  }
+}
+
+/* ================= บุคลากร ================= */
+function renderStaff(list){
+  const depts=["ทั้งหมด",...new Set(list.map(s=>s.dept).filter(Boolean))];
+  $("#staffFilters").innerHTML=depts.map((d,i)=>`<button class="${i?"":"on"}" onclick="filterStaff('${esc(d)}',this)">${esc(d)}</button>`).join("");
+  window._staff=list; drawStaff(list);
+}
+function drawStaff(list){
+  $("#staffGrid").innerHTML=list.map(s=>{
+    const init=(s.name||"?").replace(/^(นาย|นางสาว|นาง|ดร\.|ว่าที่ ร\.ต\.)\s*/,"").charAt(0);
+    return `<div class="card person">
+      <div class="avatar">${s.photo?`<img src="${esc(s.photo)}" alt="${esc(s.name)}">`:esc(init)}</div>
+      <div class="nm">${esc(s.name)}</div><div class="pos">${esc(s.pos)}</div>
+      <div class="dept"><span class="chip">${esc(s.dept||"")}</span></div></div>`;
+  }).join("");
+}
+function filterStaff(d,btn){
+  $$("#staffFilters button").forEach(b=>b.classList.remove("on"));btn.classList.add("on");
+  drawStaff(d==="ทั้งหมด"?window._staff:window._staff.filter(s=>s.dept===d));
+}
+
+/* ================= แกลเลอรี (หมวด + ปี พ.ศ.) ================= */
+let galState={cat:"ทั้งหมด",year:"ทุกปี"};
+function renderGallery(list){
+  window._gal=list;
+  const cats=["ทั้งหมด",...new Set(list.map(g=>g.cat).filter(Boolean))];
+  const years=["ทุกปี",...[...new Set(list.map(g=>g.year).filter(Boolean))].sort().reverse()];
+  $("#galFilters").innerHTML=
+    cats.map((c,i)=>`<button class="${i?"":"on"}" data-t="cat" data-v="${esc(c)}" onclick="filterGal(this)">${esc(c)}</button>`).join("")
+    +`<span class="sep">|</span>`
+    +years.map((y,i)=>`<button class="${i?"":"on"}" data-t="year" data-v="${esc(y)}" onclick="filterGal(this)">${y==="ทุกปี"?y:"พ.ศ. "+esc(y)}</button>`).join("");
+  drawGal();
+}
+function filterGal(btn){
+  galState[btn.dataset.t]=btn.dataset.v;
+  $$(`#galFilters button[data-t=${btn.dataset.t}]`).forEach(b=>b.classList.remove("on"));
+  btn.classList.add("on"); drawGal();
+}
+function drawGal(){
+  const list=window._gal.filter(g=>(galState.cat==="ทั้งหมด"||g.cat===galState.cat)&&(galState.year==="ทุกปี"||g.year===galState.year));
+  $("#galGrid").innerHTML=list.length?list.map(g=>{
+    const inner=`<div class="ph">${g.img?`<img src="${esc(g.img)}" alt="${esc(g.title)}">`:esc(g.icon||"📷")}<span class="yr">พ.ศ. ${esc(g.year)}</span></div>
+      <div class="bd"><span class="chip gold">${esc(g.cat)}</span><h3 style="margin-top:8px">${esc(g.title)}</h3>
+      ${g.link?'<div class="meta">🖼️ กดเพื่อดูอัลบั้มเต็ม</div>':""}</div>`;
+    return g.link?`<a class="card card-link" href="${esc(g.link)}" target="_blank">${inner}</a>`:`<div class="card">${inner}</div>`;
+  }).join(""):'<div class="loadmsg">ไม่พบกิจกรรมในหมวด/ปีที่เลือก</div>';
+}
+
+/* ================= กราฟผลสอบ (Chart.js) ================= */
+const NAVY="#1C3667",GOLD="#F0B429",GRAY="#B9C2D6";
+Chart.defaults.font.family="'Sarabun'";Chart.defaults.font.size=13;
+function num(v){const n=parseFloat(v);return isNaN(n)?0:n;}
+function renderResults(rows){
+  rows=rows.map(r=>({test:(r.test||"").toUpperCase(),year:r.year,subject:r.subject,school:num(r.school),national:num(r.national)}));
+  const onetYearly=rows.filter(r=>r.test==="O-NET"&&r.subject==="เฉลี่ยรวม").sort((a,b)=>a.year.localeCompare(b.year));
+  const latestYear=onetYearly.length?onetYearly[onetYearly.length-1].year:(rows[0]&&rows[0].year||"");
+  const onetSub=rows.filter(r=>r.test==="O-NET"&&r.year===latestYear&&r.subject!=="เฉลี่ยรวม");
+  const nt=rows.filter(r=>r.test==="NT"), rt=rows.filter(r=>r.test==="RT");
+
+  /* การ์ดสถิติ */
+  const last=onetYearly[onetYearly.length-1],prev=onetYearly[onetYearly.length-2];
+  const diff=last&&prev?(last.school-prev.school):0;
+  const beat=onetSub.filter(r=>r.school>r.national).length;
+  $("#statRow").innerHTML=`
+   <div class="stat"><div class="v">${last?last.school.toFixed(1):"-"}</div><div class="l">O-NET เฉลี่ยรวม ปี ${esc(latestYear)}</div>
+     <div class="d ${diff>=0?"up":"down"}">${diff>=0?"▲ เพิ่มขึ้น":"▼ ลดลง"} ${Math.abs(diff).toFixed(1)} จากปีก่อน</div></div>
+   <div class="stat"><div class="v">${beat}/${onetSub.length}</div><div class="l">วิชาที่สูงกว่าค่าเฉลี่ยประเทศ</div><div class="d up">ปีการศึกษา ${esc(latestYear)}</div></div>
+   <div class="stat"><div class="v">${nt.length?(nt.reduce((s,r)=>s+r.school,0)/nt.length).toFixed(1):"-"}</div><div class="l">NT ป.3 เฉลี่ย</div><div class="d up">สูงกว่าประเทศ</div></div>
+   <div class="stat"><div class="v">${rt.length?(rt.reduce((s,r)=>s+r.school,0)/rt.length).toFixed(1):"-"}</div><div class="l">RT ป.1 การอ่าน เฉลี่ย</div><div class="d up">สูงกว่าประเทศ</div></div>`;
+
+  const opts={responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"bottom"}}};
+  new Chart($("#chOnet"),{type:"bar",data:{labels:onetSub.map(r=>r.subject),datasets:[
+    {label:"โรงเรียนเรา",data:onetSub.map(r=>r.school),backgroundColor:NAVY,borderRadius:6},
+    {label:"ค่าเฉลี่ยประเทศ",data:onetSub.map(r=>r.national),backgroundColor:GRAY,borderRadius:6}]},options:opts});
+  new Chart($("#chTrend"),{type:"line",data:{labels:onetYearly.map(r=>"ปี "+r.year),datasets:[
+    {label:"โรงเรียนเรา",data:onetYearly.map(r=>r.school),borderColor:NAVY,backgroundColor:NAVY,tension:.3,borderWidth:3,pointRadius:5},
+    {label:"ค่าเฉลี่ยประเทศ",data:onetYearly.map(r=>r.national),borderColor:GOLD,backgroundColor:GOLD,tension:.3,borderWidth:3,pointRadius:5,borderDash:[6,4]}]},options:opts});
+  const ntrt=[...nt,...rt];
+  new Chart($("#chNtrt"),{type:"bar",data:{labels:ntrt.map(r=>r.test+" · "+r.subject),datasets:[
+    {label:"โรงเรียนเรา",data:ntrt.map(r=>r.school),backgroundColor:GOLD,borderRadius:6},
+    {label:"ค่าเฉลี่ยประเทศ",data:ntrt.map(r=>r.national),backgroundColor:GRAY,borderRadius:6}]},options:opts});
+}
+
+/* ================= คลังไฟล์ ================= */
+function renderFiles(list){
+  $("#fileRows").innerHTML=list.map(f=>`<a class="frow" href="${esc(f.link||"#")}" target="_blank">
+    <span class="fi">${esc(f.icon||"📄")}</span> ${esc(f.name)} <span class="chip cat">${esc(f.cat||"")}</span></a>`).join("");
+}
+
+/* ================= เริ่มระบบ ================= */
+(async function init(){
+  /* 1) settings จากชีต (ถ้ามี) ทับค่าใน CONFIG — เปลี่ยนชื่อ รร. โดยไม่แตะโค้ด */
+  const st=await loadSheet("settings");
+  if(st)st.forEach(r=>{ if(r.key&&r.value!==undefined){ if(r.key==="announcements")CONFIG.announcements=r.value.split("|").map(s=>s.trim()).filter(Boolean); else CONFIG[r.key]=r.value; }});
+  applySettings();
+  /* 2) โหลดทุกส่วนพร้อมกัน — ชีตไม่มี = ใช้เดโม่ */
+  const [nw,sf,gl,rs,fl]=await Promise.all([loadSheet("news"),loadSheet("staff"),loadSheet("gallery"),loadSheet("results"),loadSheet("files")]);
+  renderSchoolNews(nw&&nw.length?nw:DEMO.news);
+  renderStaff(sf&&sf.length?sf:DEMO.staff);
+  renderGallery(gl&&gl.length?gl:DEMO.gallery);
+  renderResults(rs&&rs.length?rs:DEMO.results);
+  renderFiles(fl&&fl.length?fl:DEMO.files);
+  /* 3) ข่าวการศึกษาอัตโนมัติ */
+  loadEduNews();
+})();
+</script>
+</body>
+</html>
