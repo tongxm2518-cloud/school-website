@@ -317,7 +317,12 @@ const CONFIG = {
   phone      : "0-4200-0000",
   email      : "school@example.ac.th",
   address    : "หมู่ 8 ต.ทรายขาว อ.วังสะพุง จ.เลย",
-  logoUrl    : "",                              // ลิงก์รูปตราโรงเรียน (เว้นว่าง = ใช้ 🏫)
+  logoUrl    : "",
+  bannerImg  : "https://drive.google.com/thumbnail?id=1VcAgit3wsFy1xn3RjxQXclyuX_nW5rTR&sz=w2000",
+  directorPhoto:"https://drive.google.com/thumbnail?id=1ZPi_X9G--KxzQH9BgFCKkJiZIp6HCjTa&sz=w1000",
+  directorName:"นายทวิช วันหากิจ",
+  directorPos:"ผู้อำนวยการโรงเรียน",
+  welcomeText:"Welcome to Banwoefakhuaykudtoruea School",                              // ลิงก์รูปตราโรงเรียน (เว้นว่าง = ใช้ 🏫)
   meetLink   : "https://meet.google.com/",      // ลิงก์ห้องประชุมประจำ รร.
   driveLink  : "https://drive.google.com/",     // โฟลเดอร์คลังไฟล์กลาง
   formLink   : "https://forms.google.com/",     // ฟอร์มส่งไฟล์งาน
@@ -390,6 +395,12 @@ files:[
 /* ================= เครื่องมือหลัก ================= */
 const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
 const esc=t=>String(t??"").replace(/[<>&"]/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;"}[c]));
+/* แปลงลิงก์ Google Drive ทุกแบบ ให้เป็นลิงก์รูปที่แสดงบนเว็บได้อัตโนมัติ */
+function driveImg(u){
+  if(!u)return u; u=String(u).trim();
+  const m=u.match(/drive\.google\.com\/file\/d\/([\w-]+)/)||u.match(/[?&]id=([\w-]+)/)||u.match(/googleusercontent\.com\/d\/([\w-]+)/);
+  return m?("https://drive.google.com/thumbnail?id="+m[1]+"&sz=w2000"):u;
+}
 
 function go(p){
   $$(".page").forEach(x=>x.classList.remove("on"));
@@ -422,19 +433,19 @@ async function loadSheet(key){
 function applySettings(){
   document.title=CONFIG.schoolName+" — เว็บไซต์โรงเรียน";
   $$("[data-cfg]").forEach(el=>{const k=el.dataset.cfg; if(CONFIG[k])el.textContent=CONFIG[k];});
-  if(CONFIG.logoUrl){$("#logoBox").innerHTML='<img src="'+esc(CONFIG.logoUrl)+'" alt="ตราโรงเรียน">';$("#crestBox").innerHTML='<img src="'+esc(CONFIG.logoUrl)+'" style="width:74px;height:74px;border-radius:50%;object-fit:cover;border:2px solid var(--gold)" alt="">';}
+  if(CONFIG.logoUrl){CONFIG.logoUrl=driveImg(CONFIG.logoUrl);$("#logoBox").innerHTML='<img src="'+esc(CONFIG.logoUrl)+'" alt="ตราโรงเรียน">';$("#crestBox").innerHTML='<img src="'+esc(CONFIG.logoUrl)+'" style="width:74px;height:74px;border-radius:50%;object-fit:cover;border:2px solid var(--gold)" alt="">';}
   $("#qMeet").href=$("#tMeet").href=CONFIG.meetLink;
   $("#qSend").href=$("#tSend").href=CONFIG.formLink;
   $("#tDrive").href=CONFIG.driveLink; $("#tCal").href=CONFIG.calendarLink;
   $("#tickerRun").innerHTML=CONFIG.announcements.map(a=>"<span>"+esc(a)+"</span>").join("");
   /* แบนเนอร์ภาพพื้นหลัง (ตั้งค่า bannerImg ในชีต settings) */
-  if(CONFIG.bannerImg){const h=$("#heroBox");h.classList.add("hasimg");h.style.backgroundImage="url('"+CONFIG.bannerImg.replace(/'/g,"")+"')";}
+  if(CONFIG.bannerImg){const h=$("#heroBox");h.classList.add("hasimg");h.style.backgroundImage="url('"+driveImg(CONFIG.bannerImg).replace(/'/g,"")+"')";}
   /* การ์ดรูปผู้อำนวยการ (directorName / directorPos / directorPhoto ในชีต settings) */
   if(CONFIG.directorName||CONFIG.directorPhoto){
     $("#dirCard").style.display="block";
     $("#dirName").textContent=CONFIG.directorName||"";
     $("#dirPos").textContent=CONFIG.directorPos||"ผู้อำนวยการโรงเรียน";
-    if(CONFIG.directorPhoto)$("#dirFrame").innerHTML='<img src="'+esc(CONFIG.directorPhoto)+'" alt="ผู้อำนวยการ">';
+    if(CONFIG.directorPhoto)$("#dirFrame").innerHTML='<img src="'+esc(driveImg(CONFIG.directorPhoto))+'" alt="ผู้อำนวยการ">';
   }
   /* ข้อความ Welcome ภาษาอังกฤษ (welcomeText ในชีต settings) */
   if(CONFIG.welcomeText){$("#welcomeLine").style.display="block";$("#welcomeLine").textContent=CONFIG.welcomeText;}
@@ -486,7 +497,7 @@ function drawStaff(list){
   $("#staffGrid").innerHTML=list.map(s=>{
     const init=(s.name||"?").replace(/^(นาย|นางสาว|นาง|ดร\.|ว่าที่ ร\.ต\.)\s*/,"").charAt(0);
     return `<div class="card person">
-      <div class="avatar">${s.photo?`<img src="${esc(s.photo)}" alt="${esc(s.name)}">`:esc(init)}</div>
+      <div class="avatar">${s.photo?`<img src="${esc(driveImg(s.photo))}" alt="${esc(s.name)}">`:esc(init)}</div>
       <div class="nm">${esc(s.name)}</div><div class="pos">${esc(s.pos)}</div>
       <div class="dept"><span class="chip">${esc(s.dept||"")}</span></div></div>`;
   }).join("");
@@ -516,7 +527,7 @@ function filterGal(btn){
 function drawGal(){
   const list=window._gal.filter(g=>(galState.cat==="ทั้งหมด"||g.cat===galState.cat)&&(galState.year==="ทุกปี"||g.year===galState.year));
   $("#galGrid").innerHTML=list.length?list.map(g=>{
-    const inner=`<div class="ph">${g.img?`<img src="${esc(g.img)}" alt="${esc(g.title)}">`:esc(g.icon||"📷")}<span class="yr">พ.ศ. ${esc(g.year)}</span></div>
+    const inner=`<div class="ph">${g.img?`<img src="${esc(driveImg(g.img))}" alt="${esc(g.title)}">`:esc(g.icon||"📷")}<span class="yr">พ.ศ. ${esc(g.year)}</span></div>
       <div class="bd"><span class="chip gold">${esc(g.cat)}</span><h3 style="margin-top:8px">${esc(g.title)}</h3>
       ${g.link?'<div class="meta">🖼️ กดเพื่อดูอัลบั้มเต็ม</div>':""}</div>`;
     return g.link?`<a class="card card-link" href="${esc(g.link)}" target="_blank">${inner}</a>`:`<div class="card">${inner}</div>`;
