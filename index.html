@@ -403,6 +403,8 @@ function driveImg(u){
 }
 /* ลองโหลดรูป ถ้าโหลดได้เรียก ok(url) ถ้าไม่ได้เรียก fail() */
 function tryImg(url,ok,fail){const im=new Image();im.onload=()=>ok(url);im.onerror=()=>fail();im.src=url;}
+/* ลองรายชื่อไฟล์ทีละตัวจนกว่าจะเจอ */
+function tryImgs(list,ok,fail){ if(!list.length)return fail(); tryImg(list[0],ok,()=>tryImgs(list.slice(1),ok,fail)); }
 
 function go(p){
   $$(".page").forEach(x=>x.classList.remove("on"));
@@ -441,14 +443,14 @@ function applySettings(){
   $("#tDrive").href=CONFIG.driveLink; $("#tCal").href=CONFIG.calendarLink;
   $("#tickerRun").innerHTML=CONFIG.announcements.map(a=>"<span>"+esc(a)+"</span>").join("");
   /* แบนเนอร์: ลองใช้ banner.jpg ในโฟลเดอร์เว็บก่อน ถ้าไม่มีค่อยใช้ลิงก์จากชีต */
-  tryImg("banner.jpg",u=>{const hb=$("#heroBox");hb.classList.add("hasimg");hb.style.backgroundImage="url('"+u+"')";},
+  tryImgs(["banner.jpg","banner.jpg.jfif","banner.jfif","banner.jpeg","banner.png","banner.jpg.jpg"],u=>{const hb=$("#heroBox");hb.classList.add("hasimg");hb.style.backgroundImage="url('"+u+"')";},
     ()=>{ if(CONFIG.bannerImg){const u=driveImg(CONFIG.bannerImg).replace(/'/g,"");tryImg(u,uu=>{const hb=$("#heroBox");hb.classList.add("hasimg");hb.style.backgroundImage="url('"+uu+"')";},()=>{});} });
   /* การ์ดรูปผู้อำนวยการ (directorName / directorPos / directorPhoto ในชีต settings) */
   if(CONFIG.directorName||CONFIG.directorPhoto){
     $("#dirCard").style.display="block";
     $("#dirName").textContent=CONFIG.directorName||"";
     $("#dirPos").textContent=CONFIG.directorPos||"ผู้อำนวยการโรงเรียน";
-    tryImg("director.jpg",u=>{$("#dirFrame").innerHTML='<img src="'+u+'" alt="ผู้อำนวยการ">';},
+    tryImgs(["director.jpg","director.jpg.jpg","director.jpeg","director.png","director.jpg.jfif","director.jfif"],u=>{$("#dirFrame").innerHTML='<img src="'+u+'" alt="ผู้อำนวยการ">';},
       ()=>{ if(CONFIG.directorPhoto)tryImg(driveImg(CONFIG.directorPhoto),u=>{$("#dirFrame").innerHTML='<img src="'+esc(u)+'" alt="ผู้อำนวยการ">';},()=>{}); });
   }
   /* ข้อความ Welcome ภาษาอังกฤษ (welcomeText ในชีต settings) */
