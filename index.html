@@ -472,21 +472,37 @@ async function loadSheet(key){
 }
 
 /* ====== อ่านโฟลเดอร์ Drive ผ่าน Apps Script (แกลเลอรี + คลังเอกสาร) ======
-   ใช้ JSONP เพราะ Apps Script ไม่ส่ง CORS header — fetch() ธรรมดาจะโดนบล็อก */
+   ใช้ JSONP เพราะ Apps Script ไม่ส่ง CORS header — fetch() ธรรมดาจะโดนบล็อก
+   หมายเหตุ: สแกนโฟลเดอร์เยอะๆ Google ใช้เวลานาน จึงตั้ง timeout ไว้ 60 วินาที */
+let _cbSeq=0;
 function loadApi(){
   if(!CONFIG.apiUrl) return Promise.resolve(null);
   return new Promise(resolve=>{
-    const cb="__driveCb"+Date.now();
+    const cb="__driveCb"+(++_cbSeq);
     const s=document.createElement("script");
     let done=false;
-    const finish=v=>{ if(done)return; done=true;
-      delete window[cb]; if(s.parentNode)s.parentNode.removeChild(s); clearTimeout(timer); resolve(v); };
+
+    const finish=v=>{
+      if(done)return; done=true;
+      clearTimeout(timer);
+      if(s.parentNode)s.parentNode.removeChild(s);
+      /* ไม่ลบ window[cb] ทันที กันกรณีสคริปต์มาช้าแล้วเรียกซ้ำ → ReferenceError */
+      setTimeout(()=>{ try{ delete window[cb]; }catch(e){} },1000);
+      resolve(v);
+    };
+
     window[cb]=d=>{
       if(!d||(!d.gallery&&!d.files)){console.warn("Drive ส่งข้อมูลว่าง");return finish(null);}
+      console.log("✅ อ่านโฟลเดอร์ Drive สำเร็จ — กิจกรรม "+(d.gallery?d.gallery.length:0)+" รายการ, คลังไฟล์ "+(d.files?d.files.length:0)+" รายการ");
       finish(d);
     };
-    const timer=setTimeout(()=>{console.warn("อ่านโฟลเดอร์ Drive ไม่ได้ (หมดเวลา) — ใช้ชีต/เดโม่แทน");finish(null);},20000);
-    s.onerror=()=>{console.warn("อ่านโฟลเดอร์ Drive ไม่ได้ (โหลดสคริปต์ล้มเหลว) — ใช้ชีต/เดโม่แทน");finish(null);};
+
+    const timer=setTimeout(()=>{
+      console.warn("อ่านโฟลเดอร์ Drive ไม่ได้ (เกิน 60 วินาที) — ใช้ข้อมูลตัวอย่างแทน");
+      finish(null);
+    },60000);
+
+    s.onerror=()=>{console.warn("อ่านโฟลเดอร์ Drive ไม่ได้ (โหลดสคริปต์ล้มเหลว) — ตรวจสิทธิ์ Deploy ต้องเป็น 'ทุกคน'");finish(null);};
     s.src=CONFIG.apiUrl+(CONFIG.apiUrl.includes("?")?"&":"?")+"what=all&callback="+cb;
     document.head.appendChild(s);
   });
@@ -693,20 +709,24 @@ function closeDrive(){$("#driveModal").classList.remove("on");$("#dmFrame").src=
   const st=await loadSheet("settings");
   if(st)st.forEach(r=>{ if(r.key&&r.value!==undefined){ if(r.key==="announcements")CONFIG.announcements=r.value.split("|").map(s=>s.trim()).filter(Boolean); else CONFIG[r.key]=r.value; }});
   applySettings();
-  /* 2) โหลดทุกส่วนพร้อมกัน
-        ข่าว/บุคลากร/ผลสอบ = ชีต   |   แกลเลอรี/คลังไฟล์ = โฟลเดอร์ Drive เท่านั้น */
-  const [nw,sf,rs,api]=await Promise.all([loadSheet("news"),loadSheet("staff"),loadSheet("results"),loadApi()]);
+  /* 2) ข่าว/บุคลากร/ผลสอบ จากชีต — โหลดเร็ว แสดงก่อน */
+  const [nw,sf,rs]=await Promise.all([loadSheet("news"),loadSheet("staff"),loadSheet("results")]);
   renderSchoolNews(nw&&nw.length?approvedRows(nw):DEMO.news);
   renderStaff(sf&&sf.length?approvedRows(sf):DEMO.staff);
   renderResults(rs&&rs.length?rs:DEMO.results);
 
-  /* แกลเลอรี + คลังเอกสาร: อ่านจากโฟลเดอร์ Drive (ถ้าอ่านไม่ได้จริงๆ ค่อยใช้เดโม่) */
-  if(!api||!api.gallery||!api.gallery.length){
-    console.warn("⚠️ อ่านโฟลเดอร์ Drive ไม่ได้ — กำลังแสดงข้อมูลตัวอย่าง | ตรวจ CONFIG.apiUrl และการ Deploy");
-  }
-  renderGallery(api&&api.gallery&&api.gallery.length ? api.gallery : DEMO.gallery);
-  renderFiles(  api&&api.files  &&api.files.length   ? api.files   : DEMO.files);
-  /* 3) ข่าวการศึกษาอัตโนมัติ */
+  /* 3) แกลเลอรี + คลังเอกสาร: อ่านจากโฟลเดอร์ Drive
+        Google สแกนโฟลเดอร์เยอะๆ ใช้เวลาหลายวินาที — ไม่รอ ให้แสดง "กำลังโหลด" ไปก่อน */
+  $("#galGrid").innerHTML='<div class="loadmsg">⏳ กำลังอ่านโฟลเดอร์ Google Drive...</div>';
+  $("#fileRows").innerHTML='<div class="loadmsg">⏳ กำลังอ่านโฟลเดอร์ Google Drive...</div>';
+  loadApi().then(api=>{
+    if(api&&api.gallery&&api.gallery.length) renderGallery(api.gallery);
+    else { console.warn("⚠️ ใช้ข้อมูลตัวอย่างแทน — ตรวจ CONFIG.apiUrl และการ Deploy (ต้องเป็น 'ทุกคน')"); renderGallery(DEMO.gallery); }
+    if(api&&api.files&&api.files.length) renderFiles(api.files);
+    else renderFiles(DEMO.files);
+  });
+
+  /* 4) ข่าวการศึกษาอัตโนมัติ */
   loadEduNews();
 })();
 </script>
