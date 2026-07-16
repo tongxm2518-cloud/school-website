@@ -471,19 +471,25 @@ async function loadSheet(key){
   catch(e){console.warn("โหลดชีต "+key+" ไม่ได้ ใช้ข้อมูลเดโม่แทน");return null;}
 }
 
-/* ====== อ่านโฟลเดอร์ Drive ผ่าน Apps Script (แกลเลอรี + คลังเอกสาร) ====== */
-async function loadApi(){
-  if(!CONFIG.apiUrl) return null;
-  try{
-    const r=await fetch(CONFIG.apiUrl+(CONFIG.apiUrl.includes("?")?"&":"?")+"what=all");
-    if(!r.ok)throw 0;
-    const d=await r.json();
-    if(!d||(!d.gallery&&!d.files))throw 0;
-    return d;
-  }catch(e){
-    console.warn("อ่านโฟลเดอร์ Drive ไม่ได้ — ย้อนไปใช้ชีต/เดโม่",e);
-    return null;
-  }
+/* ====== อ่านโฟลเดอร์ Drive ผ่าน Apps Script (แกลเลอรี + คลังเอกสาร) ======
+   ใช้ JSONP เพราะ Apps Script ไม่ส่ง CORS header — fetch() ธรรมดาจะโดนบล็อก */
+function loadApi(){
+  if(!CONFIG.apiUrl) return Promise.resolve(null);
+  return new Promise(resolve=>{
+    const cb="__driveCb"+Date.now();
+    const s=document.createElement("script");
+    let done=false;
+    const finish=v=>{ if(done)return; done=true;
+      delete window[cb]; if(s.parentNode)s.parentNode.removeChild(s); clearTimeout(timer); resolve(v); };
+    window[cb]=d=>{
+      if(!d||(!d.gallery&&!d.files)){console.warn("Drive ส่งข้อมูลว่าง");return finish(null);}
+      finish(d);
+    };
+    const timer=setTimeout(()=>{console.warn("อ่านโฟลเดอร์ Drive ไม่ได้ (หมดเวลา) — ใช้ชีต/เดโม่แทน");finish(null);},20000);
+    s.onerror=()=>{console.warn("อ่านโฟลเดอร์ Drive ไม่ได้ (โหลดสคริปต์ล้มเหลว) — ใช้ชีต/เดโม่แทน");finish(null);};
+    s.src=CONFIG.apiUrl+(CONFIG.apiUrl.includes("?")?"&":"?")+"what=all&callback="+cb;
+    document.head.appendChild(s);
+  });
 }
 
 /* ================= ตั้งค่าโรงเรียน (เปลี่ยนชื่อ รร. ทั้งเว็บ) ================= */
