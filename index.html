@@ -384,7 +384,7 @@ const CONFIG = {
      เว้นว่าง "" = ซ่อนส่วนปฏิทิน */
   calendarEmbedId:"d911a2328f2db522b3d4d2d835b801bccab4e0d73bb8e4b7e888b32588532808@group.calendar.google.com",
   /* 🎬 ฟอร์มให้ครูส่งลิงก์วิดีโอ YouTube (สร้างตามคู่มือ แล้ววางลิงก์ที่นี่) */
-  videoFormLink:"https://forms.google.com/",
+  videoFormLink:"https://docs.google.com/forms/d/e/1FAIpQLSfbnPp_qz1EYd6VBqHPzdj1v_nnLDfgIQDRZ6sKZpqPjt-6VQ/viewform",
   /* 📘 ลิงก์คู่มือครู (จะวางไฟล์ไว้ที่ Drive แล้วเอาลิงก์มาใส่ก็ได้) */
   videoGuideLink:"",
   /* ชั้นเรียนที่เปิดสอน — แก้ตรงนี้ถ้าเปิด/ปิดชั้นไหน */
@@ -405,7 +405,7 @@ const CONFIG = {
     /* 🎬 แท็บ videos — สร้างแท็บใหม่ในชีต แล้วเผยแพร่เป็น CSV มาวางที่นี่
        คอลัมน์: grade | title | subject | teacher | youtube | year | approve
        ★ approve ต้องใส่ yes / อนุมัติ / ผ่าน / ok / 1 เท่านั้น จึงขึ้นเว็บ */
-    videos:""
+    videos:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTN6DfV3VqK7saYF87csvrD10Bhn6-Hefzdd--dKxNP3W4tW8mv06e1iJV7nN0KxLtiMvCKg-3MTrcO/pub?gid=2064938150&single=true&output=csv"
   },
   rssFeeds: [ // แหล่งข่าวการศึกษา ดึงอัตโนมัติ
     "https://moe360.blog/feed/",
@@ -829,7 +829,15 @@ function closeDrive(){$("#driveModal").classList.remove("on");$("#dmFrame").src=
 (async function init(){
   /* 1) settings จากชีต (ถ้ามี) ทับค่าใน CONFIG — เปลี่ยนชื่อ รร. โดยไม่แตะโค้ด */
   const st=await loadSheet("settings");
-  if(st)st.forEach(r=>{ if(r.key&&r.value!==undefined){ if(r.key==="announcements")CONFIG.announcements=r.value.split("|").map(s=>s.trim()).filter(Boolean); else CONFIG[r.key]=r.value; }});
+  /* ชีต settings ทับค่าใน CONFIG ได้ — แต่ถ้าช่องว่าง ให้ใช้ค่าในไฟล์แทน
+     (กันกรณีลืมกรอกในชีตแล้วลิงก์ที่ตั้งไว้หายไป) */
+  if(st)st.forEach(r=>{
+    if(!r.key)return;
+    const v=(r.value===undefined||r.value===null)?"":String(r.value).trim();
+    if(!v)return;                       // ← ว่าง = ไม่ทับ
+    if(r.key==="announcements")CONFIG.announcements=v.split("|").map(s=>s.trim()).filter(Boolean);
+    else CONFIG[r.key]=v;
+  });
   applySettings();
   /* 2) ข่าว/บุคลากร/ผลสอบ/วิดีโอ จากชีต — โหลดเร็ว แสดงก่อน */
   const [nw,sf,rs,vd]=await Promise.all([loadSheet("news"),loadSheet("staff"),loadSheet("results"),loadSheet("videos")]);
