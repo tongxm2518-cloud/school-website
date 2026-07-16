@@ -693,17 +693,19 @@ function closeDrive(){$("#driveModal").classList.remove("on");$("#dmFrame").src=
   const st=await loadSheet("settings");
   if(st)st.forEach(r=>{ if(r.key&&r.value!==undefined){ if(r.key==="announcements")CONFIG.announcements=r.value.split("|").map(s=>s.trim()).filter(Boolean); else CONFIG[r.key]=r.value; }});
   applySettings();
-  /* 2) โหลดทุกส่วนพร้อมกัน — ชีตไม่มี = ใช้เดโม่ */
-  const [nw,sf,gl,rs,fl,api]=await Promise.all([loadSheet("news"),loadSheet("staff"),loadSheet("gallery"),loadSheet("results"),loadSheet("files"),loadApi()]);
+  /* 2) โหลดทุกส่วนพร้อมกัน
+        ข่าว/บุคลากร/ผลสอบ = ชีต   |   แกลเลอรี/คลังไฟล์ = โฟลเดอร์ Drive เท่านั้น */
+  const [nw,sf,rs,api]=await Promise.all([loadSheet("news"),loadSheet("staff"),loadSheet("results"),loadApi()]);
   renderSchoolNews(nw&&nw.length?approvedRows(nw):DEMO.news);
   renderStaff(sf&&sf.length?approvedRows(sf):DEMO.staff);
   renderResults(rs&&rs.length?rs:DEMO.results);
 
-  /* แกลเลอรี + คลังเอกสาร: โฟลเดอร์ Drive มาก่อน → ชีต → เดโม่ */
-  renderGallery(api&&api.gallery&&api.gallery.length ? api.gallery
-              : (gl&&gl.length?approvedRows(gl):DEMO.gallery));
-  renderFiles(api&&api.files&&api.files.length ? api.files
-            : (fl&&fl.length?approvedRows(fl):DEMO.files));
+  /* แกลเลอรี + คลังเอกสาร: อ่านจากโฟลเดอร์ Drive (ถ้าอ่านไม่ได้จริงๆ ค่อยใช้เดโม่) */
+  if(!api||!api.gallery||!api.gallery.length){
+    console.warn("⚠️ อ่านโฟลเดอร์ Drive ไม่ได้ — กำลังแสดงข้อมูลตัวอย่าง | ตรวจ CONFIG.apiUrl และการ Deploy");
+  }
+  renderGallery(api&&api.gallery&&api.gallery.length ? api.gallery : DEMO.gallery);
+  renderFiles(  api&&api.files  &&api.files.length   ? api.files   : DEMO.files);
   /* 3) ข่าวการศึกษาอัตโนมัติ */
   loadEduNews();
 })();
