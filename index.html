@@ -200,6 +200,7 @@ footer b{color:var(--goldsoft)}
   <button class="tab" data-p="staff" onclick="go('staff')">บุคลากร</button>
   <button class="tab" data-p="gallery" onclick="go('gallery')">กิจกรรม</button>
   <button class="tab" data-p="results" onclick="go('results')">ผลสัมฤทธิ์</button>
+  <button class="tab" data-p="videos" onclick="go('videos')">สื่อวิดีโอ</button>
   <button class="tab" data-p="library" onclick="go('library')">คลังไฟล์·สื่อ</button>
   <button class="tab" data-p="admin" onclick="go('admin')">⚙️ ผู้ดูแล</button>
 </div></nav>
@@ -286,9 +287,17 @@ footer b{color:var(--goldsoft)}
   <div class="tool-grid">
     <a class="tool" id="tDrive" target="_blank"><div class="ic">📁</div><div><b>คลังไฟล์กลาง (Google Drive)</b><small>เอกสาร คำสั่ง แผนการสอน เก็บรวมที่เดียว ค้นหาได้</small></div></a>
     <a class="tool" id="tSend" target="_blank"><div class="ic">📤</div><div><b>ส่งไฟล์งาน (Google ฟอร์ม)</b><small>ครูส่งงาน → ไฟล์วิ่งเข้าโฟลเดอร์และชีตสรุปเองอัตโนมัติ</small></div></a>
-    <a class="tool" id="tMeet" target="_blank"><div class="ic">🎥</div><div><b>ประชุมออนไลน์ (Meet)</b><small>ลิงก์ห้องประชุมประจำโรงเรียน กดเข้าได้ทันที</small></div></a>
-    <a class="tool" id="tCal" target="_blank"><div class="ic">📅</div><div><b>ปฏิทินโรงเรียน</b><small>นัดประชุม/กิจกรรม แจ้งเตือนครูอัตโนมัติ</small></div></a>
+    <a class="tool" id="tMeet" target="_blank"><div class="ic">🎥</div><div><b>ห้องประชุมออนไลน์ (Meet)</b><small id="tMeetSub">ลิงก์ห้องประชุมประจำโรงเรียน กดเข้าได้ทันที ไม่ต้องนัดใหม่ทุกครั้ง</small></div></a>
+    <a class="tool" id="tCal" target="_blank"><div class="ic">📅</div><div><b>ปฏิทินโรงเรียน</b><small>นัดประชุม/กิจกรรม แจ้งเตือนครูอัตโนมัติ · ดูปฏิทินเต็มด้านล่าง</small></div></a>
   </div>
+  <div style="height:26px"></div>
+  <div class="sec-head"><h2>ปฏิทินโรงเรียน · นัดหมาย</h2><div class="rule"></div><span class="auto-badge">ประชุม · กิจกรรม · แจ้งเตือนอัตโนมัติ</span></div>
+  <p class="sec-sub">นัดประชุม กิจกรรม วันสำคัญ — ผอ. เพิ่มใน Google ปฏิทิน ครูเห็นทันทีทุกคน</p>
+  <div id="calWrap" style="background:var(--card);border-radius:14px;padding:10px;box-shadow:var(--shadow);overflow:hidden">
+    <iframe id="calFrame" style="width:100%;height:560px;border:none;border-radius:10px" src="about:blank"></iframe>
+  </div>
+  <div id="calHint" class="loadmsg" style="display:none">📅 ยังไม่ได้ตั้งค่าปฏิทิน — ดูวิธีในคู่มือครู ส่วนที่ 5</div>
+
   <div style="height:26px"></div>
   <div class="sec-head"><h2>คลังเอกสารดิจิทัล</h2><div class="rule"></div><span class="auto-badge">ค้นหา · กรองหมวด/ปี · เปิดดูในเว็บ</span></div>
   <p class="sec-sub">ผลงาน ผอ./ครู/นักเรียน · Best practice · นิเทศ PLC · แผนงาน · ผลทดสอบ — กดเพื่อเปิดดูหรือดาวน์โหลดไฟล์และวิดีโอ</p>
@@ -302,6 +311,25 @@ footer b{color:var(--goldsoft)}
     <div class="modal">
       <div class="mh"><b id="dmTitle">เอกสาร</b><a id="dmOpen" target="_blank">เปิดใน Drive ↗</a><button onclick="closeDrive()">✕</button></div>
       <iframe id="dmFrame" src="about:blank"></iframe>
+    </div>
+  </div>
+</section>
+
+<!-- ============ สื่อวิดีโอการสอน ============ -->
+<section class="page" id="pg-videos">
+  <div class="sec-head"><h2>สื่อวิดีโอการสอน</h2><div class="rule"></div><span class="auto-badge">แยกชั้น อ.1–ม.3 · เล่นในเว็บ</span></div>
+  <p class="sec-sub">ครูผลิตสื่อ อัปขึ้น YouTube แล้วส่งลิงก์ผ่านฟอร์ม → ผ่านการตรวจ → ขึ้นเว็บอัตโนมัติ</p>
+  <div class="tool-grid" style="margin-bottom:20px">
+    <a class="tool" id="tVidForm" target="_blank"><div class="ic">🎬</div><div><b>ส่งวิดีโอสื่อการสอน</b><small>ครูกรอกฟอร์ม → รอตรวจ → ขึ้นเว็บเอง</small></div></a>
+    <a class="tool" id="tVidGuide" target="_blank"><div class="ic">📘</div><div><b>คู่มือครู: วิธีอัป YouTube</b><small>อัปแบบไม่แสดงในสาธารณะ (Unlisted) ทีละขั้น</small></div></a>
+  </div>
+  <div class="vault-bar"><input id="vidSearch" placeholder="🔍 ค้นหาชื่อเรื่อง วิชา หรือชื่อครู..." oninput="drawVids()"></div>
+  <div class="filters" id="vidFilters"></div>
+  <div class="grid" id="vidGrid"></div>
+  <div class="modal-bg" id="vidModal" onclick="if(event.target===this)closeVid()">
+    <div class="modal">
+      <div class="mh"><b id="vmTitle">วิดีโอ</b><a id="vmOpen" target="_blank">เปิดใน YouTube ↗</a><button onclick="closeVid()">✕</button></div>
+      <iframe id="vmFrame" src="about:blank" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     </div>
   </div>
 </section>
@@ -346,10 +374,21 @@ const CONFIG = {
   directorName:"นายทวิช วันหากิจ",
   directorPos:"ผู้อำนวยการโรงเรียน",
   welcomeText:"Welcome to Banwoefakhuaykudtoruea School",                              // ลิงก์รูปตราโรงเรียน (เว้นว่าง = ใช้ 🏫)
-  meetLink   : "https://meet.google.com/",      // ลิงก์ห้องประชุมประจำ รร.
+  meetLink   : "https://meet.google.com/pcc-xwap-onp",      // ห้องประชุมประจำ รร. (ลิงก์ถาวร)
   driveLink  : "https://drive.google.com/",     // โฟลเดอร์คลังไฟล์กลาง
   formLink   : "https://forms.google.com/",     // ฟอร์มส่งไฟล์งาน
-  calendarLink:"https://calendar.google.com/",
+  calendarLink:"https://calendar.google.com/calendar/embed?src=d911a2328f2db522b3d4d2d835b801bccab4e0d73bb8e4b7e888b32588532808%40group.calendar.google.com&ctz=Asia%2FBangkok",
+  /* 📅 ฝังปฏิทินโรงเรียนในเว็บ — ใส่ "รหัสปฏิทิน" (Calendar ID) ที่ลงท้าย @group.calendar.google.com
+     หาได้ที่ ปฏิทิน → ตั้งค่าปฏิทิน → รวมปฏิทิน → รหัสปฏิทิน
+     ★ ต้องตั้งปฏิทินเป็น "เผยแพร่ต่อสาธารณะ" ก่อน ไม่งั้นครูจะเห็นเป็นช่องว่าง
+     เว้นว่าง "" = ซ่อนส่วนปฏิทิน */
+  calendarEmbedId:"d911a2328f2db522b3d4d2d835b801bccab4e0d73bb8e4b7e888b32588532808@group.calendar.google.com",
+  /* 🎬 ฟอร์มให้ครูส่งลิงก์วิดีโอ YouTube (สร้างตามคู่มือ แล้ววางลิงก์ที่นี่) */
+  videoFormLink:"https://forms.google.com/",
+  /* 📘 ลิงก์คู่มือครู (จะวางไฟล์ไว้ที่ Drive แล้วเอาลิงก์มาใส่ก็ได้) */
+  videoGuideLink:"",
+  /* ชั้นเรียนที่เปิดสอน — แก้ตรงนี้ถ้าเปิด/ปิดชั้นไหน */
+  grades: ["อ.1","อ.2","อ.3","ป.1","ป.2","ป.3","ป.4","ป.5","ป.6","ม.1","ม.2","ม.3"],
   announcements: ["รับสมัครนักเรียนใหม่ ปีการศึกษา 2569","ประชุมครูประจำเดือน ทุกวันศุกร์แรกของเดือน 15:30 น.","ผลสอบ O-NET ปีล่าสุดประกาศแล้ว ดูที่เมนูผลสัมฤทธิ์"],
   /* 🔗 ลิงก์ Apps Script ที่สแกนโฟลเดอร์ Drive (Deploy → Web app → Anyone)
      ใส่ลิงก์ที่ลงท้าย /exec  — ปล่อยว่าง "" = กลับไปใช้ชีต gallery/files แบบเดิม
@@ -362,7 +401,11 @@ const CONFIG = {
     staff:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTN6DfV3VqK7saYF87csvrD10Bhn6-Hefzdd--dKxNP3W4tW8mv06e1iJV7nN0KxLtiMvCKg-3MTrcO/pub?gid=1516228154&single=true&output=csv",
     gallery:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTN6DfV3VqK7saYF87csvrD10Bhn6-Hefzdd--dKxNP3W4tW8mv06e1iJV7nN0KxLtiMvCKg-3MTrcO/pub?gid=517409117&single=true&output=csv",
     results:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTN6DfV3VqK7saYF87csvrD10Bhn6-Hefzdd--dKxNP3W4tW8mv06e1iJV7nN0KxLtiMvCKg-3MTrcO/pub?gid=1256300671&single=true&output=csv",
-    files:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTN6DfV3VqK7saYF87csvrD10Bhn6-Hefzdd--dKxNP3W4tW8mv06e1iJV7nN0KxLtiMvCKg-3MTrcO/pub?gid=1653215611&single=true&output=csv"
+    files:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTN6DfV3VqK7saYF87csvrD10Bhn6-Hefzdd--dKxNP3W4tW8mv06e1iJV7nN0KxLtiMvCKg-3MTrcO/pub?gid=1653215611&single=true&output=csv",
+    /* 🎬 แท็บ videos — สร้างแท็บใหม่ในชีต แล้วเผยแพร่เป็น CSV มาวางที่นี่
+       คอลัมน์: grade | title | subject | teacher | youtube | year | approve
+       ★ approve ต้องใส่ yes / อนุมัติ / ผ่าน / ok / 1 เท่านั้น จึงขึ้นเว็บ */
+    videos:""
   },
   rssFeeds: [ // แหล่งข่าวการศึกษา ดึงอัตโนมัติ
     "https://moe360.blog/feed/",
@@ -514,8 +557,28 @@ function applySettings(){
   $$("[data-cfg]").forEach(el=>{const k=el.dataset.cfg; if(CONFIG[k])el.textContent=CONFIG[k];});
   if(CONFIG.logoUrl){CONFIG.logoUrl=driveImg(CONFIG.logoUrl);$("#logoBox").innerHTML='<img src="'+esc(CONFIG.logoUrl)+'" alt="ตราโรงเรียน">';$("#crestBox").innerHTML='<img src="'+esc(CONFIG.logoUrl)+'" style="width:74px;height:74px;border-radius:50%;object-fit:cover;border:2px solid var(--gold)" alt="">';}
   $("#qMeet").href=$("#tMeet").href=CONFIG.meetLink;
+  /* แสดงรหัสห้องประชุมบนการ์ด (ครูจดหรือบอกทางโทรศัพท์ได้) */
+  if($("#tMeetSub")){
+    const mc=(CONFIG.meetLink||"").match(/meet\.google\.com\/([a-z]{3}-[a-z]{4}-[a-z]{3})/i);
+    if(mc)$("#tMeetSub").innerHTML="ห้องประจำ รร. · รหัส <b>"+esc(mc[1])+"</b> — กดเข้าได้ทันที";
+  }
   $("#qSend").href=$("#tSend").href=CONFIG.formLink;
   $("#tDrive").href=CONFIG.driveLink; $("#tCal").href=CONFIG.calendarLink;
+  /* ฝังปฏิทินโรงเรียน (ภาษาไทย เขตเวลากรุงเทพ) */
+  if($("#calFrame")){
+    if(CONFIG.calendarEmbedId){
+      $("#calFrame").src="https://calendar.google.com/calendar/embed?src="+encodeURIComponent(CONFIG.calendarEmbedId)
+        +"&ctz=Asia%2FBangkok&hl=th&mode=MONTH&showTitle=0&showPrint=0&showTabs=1&showCalendars=0&showTz=0";
+    }else{
+      $("#calWrap").style.display="none";
+      $("#calHint").style.display="block";
+    }
+  }
+  if($("#tVidForm"))$("#tVidForm").href=CONFIG.videoFormLink||CONFIG.formLink;
+  if($("#tVidGuide")){
+    if(CONFIG.videoGuideLink)$("#tVidGuide").href=CONFIG.videoGuideLink;
+    else $("#tVidGuide").style.display="none";
+  }
   $("#tickerRun").innerHTML=CONFIG.announcements.map(a=>"<span>"+esc(a)+"</span>").join("");
   /* แบนเนอร์: ลองใช้ banner.jpg ในโฟลเดอร์เว็บก่อน ถ้าไม่มีค่อยใช้ลิงก์จากชีต */
   tryImgs(["banner.jpg","banner.jpg.jfif","banner.jfif","banner.jpeg","banner.png","banner.jpg.jpg"],u=>{const hb=$("#heroBox");hb.classList.add("hasimg");hb.style.backgroundImage="url('"+u+"')";},
@@ -627,6 +690,65 @@ function openGal(i,link){
   return false;
 }
 
+/* ================= สื่อวิดีโอการสอน (แยกชั้น อ.1–ม.3) ================= */
+let vidState={grade:"ทุกชั้น",year:"ทุกปี"};
+
+/* ดึงรหัสวิดีโอจากลิงก์ YouTube ได้ทุกรูปแบบ
+   youtu.be/XXX · watch?v=XXX · embed/XXX · shorts/XXX · live/XXX */
+function ytId(u){
+  if(!u)return "";
+  u=String(u).trim();
+  const m=u.match(/(?:youtu\.be\/|v=|\/embed\/|\/shorts\/|\/live\/)([\w-]{11})/);
+  if(m)return m[1];
+  if(/^[\w-]{11}$/.test(u))return u;   /* วางแค่รหัสมาก็ได้ */
+  return "";
+}
+
+function renderVids(list){
+  /* เอาเฉพาะแถวที่มีลิงก์ใช้ได้ */
+  window._vids=list.filter(v=>ytId(v.youtube));
+  const gs=CONFIG.grades.filter(g=>window._vids.some(v=>(v.grade||"").trim()===g));
+  const years=[...new Set(window._vids.map(v=>(v.year||"").trim()).filter(Boolean))].sort().reverse();
+  $("#vidFilters").innerHTML=
+    ["ทุกชั้น",...gs].map((g,i)=>`<button class="${i?"":"on"}" data-t="grade" data-v="${esc(g)}" onclick="filterVid(this)">${esc(g)}</button>`).join("")
+    +(years.length?`<span class="sep">|</span><button class="on" data-t="year" data-v="ทุกปี" onclick="filterVid(this)">ทุกปี</button>`
+      +years.map(y=>`<button data-t="year" data-v="${esc(y)}" onclick="filterVid(this)">พ.ศ. ${esc(y)}</button>`).join(""):"");
+  drawVids();
+}
+function filterVid(btn){
+  vidState[btn.dataset.t]=btn.dataset.v;
+  $$(`#vidFilters button[data-t=${btn.dataset.t}]`).forEach(b=>b.classList.remove("on"));
+  btn.classList.add("on"); drawVids();
+}
+function drawVids(){
+  const q=($("#vidSearch")&&$("#vidSearch").value||"").trim().toLowerCase();
+  const list=(window._vids||[]).filter(v=>
+    (vidState.grade==="ทุกชั้น"||(v.grade||"").trim()===vidState.grade)&&
+    (vidState.year==="ทุกปี"||(v.year||"").trim()===vidState.year)&&
+    (!q||[v.title,v.subject,v.teacher].some(x=>(x||"").toLowerCase().includes(q))));
+  window._vidview=list;
+  $("#vidGrid").innerHTML=list.length?list.map((v,i)=>{
+    const id=ytId(v.youtube);
+    return `<div class="card card-link" onclick="openVid(${i})">
+      <div class="ph"><img src="https://i.ytimg.com/vi/${esc(id)}/hqdefault.jpg" alt="${esc(v.title)}" loading="lazy">
+        <span class="yr">${esc(v.grade||"")}</span></div>
+      <div class="bd">
+        <span class="chip gold">${esc(v.subject||"สื่อการสอน")}</span>
+        <h3 style="margin-top:8px">${esc(v.title||"(ไม่มีชื่อเรื่อง)")}</h3>
+        <div class="meta">▶️ ${esc(v.teacher||"")}${v.year?" · พ.ศ. "+esc(v.year):""}</div>
+      </div></div>`;
+  }).join(""):'<div class="loadmsg">ยังไม่มีวิดีโอในชั้น/ปีที่เลือก</div>';
+}
+function openVid(i){
+  const v=window._vidview[i], id=ytId(v.youtube);
+  if(!id)return;
+  $("#vmTitle").textContent="🎬 "+(v.title||"")+(v.grade?"  ·  "+v.grade:"");
+  $("#vmOpen").href="https://www.youtube.com/watch?v="+id;
+  $("#vmFrame").src="https://www.youtube-nocookie.com/embed/"+id+"?rel=0";
+  $("#vidModal").classList.add("on");
+}
+function closeVid(){$("#vidModal").classList.remove("on");$("#vmFrame").src="about:blank";}
+
 /* ================= กราฟผลสอบ (Chart.js) ================= */
 const NAVY="#1C3667",GOLD="#F0B429",GRAY="#B9C2D6";
 Chart.defaults.font.family="'Sarabun'";Chart.defaults.font.size=13;
@@ -709,11 +831,13 @@ function closeDrive(){$("#driveModal").classList.remove("on");$("#dmFrame").src=
   const st=await loadSheet("settings");
   if(st)st.forEach(r=>{ if(r.key&&r.value!==undefined){ if(r.key==="announcements")CONFIG.announcements=r.value.split("|").map(s=>s.trim()).filter(Boolean); else CONFIG[r.key]=r.value; }});
   applySettings();
-  /* 2) ข่าว/บุคลากร/ผลสอบ จากชีต — โหลดเร็ว แสดงก่อน */
-  const [nw,sf,rs]=await Promise.all([loadSheet("news"),loadSheet("staff"),loadSheet("results")]);
+  /* 2) ข่าว/บุคลากร/ผลสอบ/วิดีโอ จากชีต — โหลดเร็ว แสดงก่อน */
+  const [nw,sf,rs,vd]=await Promise.all([loadSheet("news"),loadSheet("staff"),loadSheet("results"),loadSheet("videos")]);
   renderSchoolNews(nw&&nw.length?approvedRows(nw):DEMO.news);
   renderStaff(sf&&sf.length?approvedRows(sf):DEMO.staff);
   renderResults(rs&&rs.length?rs:DEMO.results);
+  /* วิดีโอ: ผ่านการตรวจแล้วเท่านั้น (คอลัมน์ approved = yes) จึงขึ้นเว็บ */
+  renderVids(vd&&vd.length?approvedRows(vd):[]);
 
   /* 3) แกลเลอรี + คลังเอกสาร: อ่านจากโฟลเดอร์ Drive
         Google สแกนโฟลเดอร์เยอะๆ ใช้เวลาหลายวินาที — ไม่รอ ให้แสดง "กำลังโหลด" ไปก่อน */
