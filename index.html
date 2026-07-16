@@ -351,6 +351,11 @@ const CONFIG = {
   formLink   : "https://forms.google.com/",     // ฟอร์มส่งไฟล์งาน
   calendarLink:"https://calendar.google.com/",
   announcements: ["รับสมัครนักเรียนใหม่ ปีการศึกษา 2569","ประชุมครูประจำเดือน ทุกวันศุกร์แรกของเดือน 15:30 น.","ผลสอบ O-NET ปีล่าสุดประกาศแล้ว ดูที่เมนูผลสัมฤทธิ์"],
+  /* 🔗 ลิงก์ Apps Script ที่สแกนโฟลเดอร์ Drive (Deploy → Web app → Anyone)
+     ใส่ลิงก์ที่ลงท้าย /exec  — ปล่อยว่าง "" = กลับไปใช้ชีต gallery/files แบบเดิม
+     ★ แกลเลอรีและคลังเอกสารจะอ่านจากโฟลเดอร์ Drive โดยตรง ไม่ต้องกรอกชีตอีก */
+  apiUrl : "",
+
   sheets: {   // ลิงก์ CSV ของแต่ละแท็บ (เผยแพร่ไปยังเว็บ → CSV)
     settings:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTN6DfV3VqK7saYF87csvrD10Bhn6-Hefzdd--dKxNP3W4tW8mv06e1iJV7nN0KxLtiMvCKg-3MTrcO/pub?gid=0&single=true&output=csv",
     news:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTN6DfV3VqK7saYF87csvrD10Bhn6-Hefzdd--dKxNP3W4tW8mv06e1iJV7nN0KxLtiMvCKg-3MTrcO/pub?gid=187597786&single=true&output=csv",
@@ -466,6 +471,21 @@ async function loadSheet(key){
   catch(e){console.warn("โหลดชีต "+key+" ไม่ได้ ใช้ข้อมูลเดโม่แทน");return null;}
 }
 
+/* ====== อ่านโฟลเดอร์ Drive ผ่าน Apps Script (แกลเลอรี + คลังเอกสาร) ====== */
+async function loadApi(){
+  if(!CONFIG.apiUrl) return null;
+  try{
+    const r=await fetch(CONFIG.apiUrl+(CONFIG.apiUrl.includes("?")?"&":"?")+"what=all");
+    if(!r.ok)throw 0;
+    const d=await r.json();
+    if(!d||(!d.gallery&&!d.files))throw 0;
+    return d;
+  }catch(e){
+    console.warn("อ่านโฟลเดอร์ Drive ไม่ได้ — ย้อนไปใช้ชีต/เดโม่",e);
+    return null;
+  }
+}
+
 /* ================= ตั้งค่าโรงเรียน (เปลี่ยนชื่อ รร. ทั้งเว็บ) ================= */
 function applySettings(){
   document.title=CONFIG.schoolName+" — เว็บไซต์โรงเรียน";
@@ -568,7 +588,7 @@ function drawGal(){
   $("#galGrid").innerHTML=list.length?list.map(g=>{
     const inner=`<div class="ph">${g.img?`<img src="${esc(driveImg(g.img))}" alt="${esc(g.title)}">`:esc(g.icon||"📷")}<span class="yr">พ.ศ. ${esc(g.year)}</span></div>
       <div class="bd"><span class="chip gold">${esc(g.cat)}</span><h3 style="margin-top:8px">${esc(g.title)}</h3>
-      ${g.link?'<div class="meta">🖼️ กดเพื่อดูอัลบั้มเต็ม</div>':""}</div>`;
+      ${g.link?`<div class="meta">🖼️ ${g.count?esc(g.count)+" รูป — ":""}กดเพื่อดูอัลบั้มเต็ม</div>`:""}</div>`;
     return g.link?`<a class="card card-link" href="${esc(g.link)}" target="_blank">${inner}</a>`:`<div class="card">${inner}</div>`;
   }).join(""):'<div class="loadmsg">ไม่พบกิจกรรมในหมวด/ปีที่เลือก</div>';
 }
@@ -656,12 +676,16 @@ function closeDrive(){$("#driveModal").classList.remove("on");$("#dmFrame").src=
   if(st)st.forEach(r=>{ if(r.key&&r.value!==undefined){ if(r.key==="announcements")CONFIG.announcements=r.value.split("|").map(s=>s.trim()).filter(Boolean); else CONFIG[r.key]=r.value; }});
   applySettings();
   /* 2) โหลดทุกส่วนพร้อมกัน — ชีตไม่มี = ใช้เดโม่ */
-  const [nw,sf,gl,rs,fl]=await Promise.all([loadSheet("news"),loadSheet("staff"),loadSheet("gallery"),loadSheet("results"),loadSheet("files")]);
+  const [nw,sf,gl,rs,fl,api]=await Promise.all([loadSheet("news"),loadSheet("staff"),loadSheet("gallery"),loadSheet("results"),loadSheet("files"),loadApi()]);
   renderSchoolNews(nw&&nw.length?approvedRows(nw):DEMO.news);
   renderStaff(sf&&sf.length?approvedRows(sf):DEMO.staff);
-  renderGallery(gl&&gl.length?approvedRows(gl):DEMO.gallery);
   renderResults(rs&&rs.length?rs:DEMO.results);
-  renderFiles(fl&&fl.length?approvedRows(fl):DEMO.files);
+
+  /* แกลเลอรี + คลังเอกสาร: โฟลเดอร์ Drive มาก่อน → ชีต → เดโม่ */
+  renderGallery(api&&api.gallery&&api.gallery.length ? api.gallery
+              : (gl&&gl.length?approvedRows(gl):DEMO.gallery));
+  renderFiles(api&&api.files&&api.files.length ? api.files
+            : (fl&&fl.length?approvedRows(fl):DEMO.files));
   /* 3) ข่าวการศึกษาอัตโนมัติ */
   loadEduNews();
 })();
