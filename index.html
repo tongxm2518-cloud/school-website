@@ -264,7 +264,7 @@ footer b{color:var(--goldsoft)}
 <!-- ============ กิจกรรม ============ -->
 <section class="page" id="pg-gallery">
   <div class="sec-head"><h2>ภาพกิจกรรมโรงเรียน</h2><div class="rule"></div><span class="auto-badge">แยกหมวด · ปี พ.ศ. อัตโนมัติ</span></div>
-  <p class="sec-sub">วางลิงก์รูป/อัลบั้มในชีต ระบบจัดหมวดหมู่และปีให้เอง กดกรองได้ทันที</p>
+  <p class="sec-sub">อ่านจากโฟลเดอร์ Google Drive โดยตรง — สร้างโฟลเดอร์ใหม่ เว็บขึ้นหมวด/ปีให้เอง</p>
   <div class="filters" id="galFilters"></div>
   <div class="grid g3" id="galGrid"></div>
 </section>
@@ -291,11 +291,11 @@ footer b{color:var(--goldsoft)}
   </div>
   <div style="height:26px"></div>
   <div class="sec-head"><h2>คลังเอกสารดิจิทัล</h2><div class="rule"></div><span class="auto-badge">ค้นหา · กรองหมวด/ปี · เปิดดูในเว็บ</span></div>
-  <p class="sec-sub">แฟ้มผลงาน ผอ. ผลงานครู นักเรียน SAR นิเทศ PLC เกียรติบัตร — กดการ์ดเพื่อเปิดดูไฟล์ในโฟลเดอร์ได้ทันที</p>
+  <p class="sec-sub">ผลงาน ผอ./ครู/นักเรียน · Best practice · นิเทศ PLC · แผนงาน · ผลทดสอบ — กดเพื่อเปิดดูหรือดาวน์โหลดไฟล์และวิดีโอ</p>
   <div class="vault-bar"><input id="fileSearch" placeholder="🔍 พิมพ์ค้นหาเอกสาร เช่น SAR, นิเทศ, เกียรติบัตร..." oninput="drawFiles()"></div>
   <div class="filters" id="fileFilters"></div>
   <div class="filelist">
-    <div class="fh">📚 เอกสารทั้งหมด (เพิ่ม/แก้ผ่านชีตแท็บ files)</div>
+    <div class="fh">📚 เอกสารทั้งหมด (เพิ่มไฟล์ในโฟลเดอร์ Drive → ขึ้นเว็บเอง)</div>
     <div id="fileRows"></div>
   </div>
   <div class="modal-bg" id="driveModal" onclick="if(event.target===this)closeDrive()">
@@ -591,12 +591,24 @@ function filterGal(btn){
 }
 function drawGal(){
   const list=window._gal.filter(g=>(galState.cat==="ทั้งหมด"||g.cat===galState.cat)&&(galState.year==="ทุกปี"||g.year===galState.year));
-  $("#galGrid").innerHTML=list.length?list.map(g=>{
-    const inner=`<div class="ph">${g.img?`<img src="${esc(driveImg(g.img))}" alt="${esc(g.title)}">`:esc(g.icon||"📷")}<span class="yr">พ.ศ. ${esc(g.year)}</span></div>
+  window._galview=list;
+  $("#galGrid").innerHTML=list.length?list.map((g,i)=>{
+    const inner=`<div class="ph">${g.img?`<img src="${esc(driveImg(g.img))}" alt="${esc(g.title)}">`:esc(g.icon||"📷")}${g.year?`<span class="yr">พ.ศ. ${esc(g.year)}</span>`:""}</div>
       <div class="bd"><span class="chip gold">${esc(g.cat)}</span><h3 style="margin-top:8px">${esc(g.title)}</h3>
-      ${g.link?`<div class="meta">🖼️ ${g.count?esc(g.count)+" รูป — ":""}กดเพื่อดูอัลบั้มเต็ม</div>`:""}</div>`;
-    return g.link?`<a class="card card-link" href="${esc(g.link)}" target="_blank">${inner}</a>`:`<div class="card">${inner}</div>`;
+      ${g.link?`<div class="meta">${g.vids?"🎬 ":"🖼️ "}${g.count?esc(g.count)+" ไฟล์":""}${g.vids?" · วิดีโอ "+esc(g.vids):""}${g.count?" — ":""}กดเพื่อเปิดดู/ดาวน์โหลด</div>`:""}</div>`;
+    return g.link?`<a class="card card-link" href="${esc(g.link)}" target="_blank" onclick="return openGal(${i},'${esc((g.link||"").replace(/'/g,""))}')">${inner}</a>`:`<div class="card">${inner}</div>`;
   }).join(""):'<div class="loadmsg">ไม่พบกิจกรรมในหมวด/ปีที่เลือก</div>';
+}
+/* เปิดอัลบั้ม/โฟลเดอร์แบบฝังในเว็บ — ดูรูป เล่นวิดีโอ ดาวน์โหลดได้ */
+function openGal(i,link){
+  const m=link.match(/drive\.google\.com\/drive\/(?:u\/\d+\/)?folders\/([\w-]+)/);
+  if(!m)return true;
+  const g=window._galview[i];
+  $("#dmTitle").textContent=(g.icon||"📷")+" "+g.title+(g.year?"  ·  พ.ศ. "+g.year:"");
+  $("#dmOpen").href=link;
+  $("#dmFrame").src="https://drive.google.com/embeddedfolderview?id="+m[1]+"#grid";
+  $("#driveModal").classList.add("on");
+  return false;
 }
 
 /* ================= กราฟผลสอบ (Chart.js) ================= */
@@ -658,7 +670,7 @@ function drawFiles(){
     (fileState.year==="ทุกปี"||(f.year||"")===fileState.year)&&
     (!q||(f.name||"").toLowerCase().includes(q)||(f.cat||"").toLowerCase().includes(q)));
   $("#fileRows").innerHTML=list.length?list.map((f,i)=>`<a class="frow" href="${esc(f.link||"#")}" onclick="return openDrive(${i},'${esc((f.link||"").replace(/'/g,""))}')" data-nm="${esc(f.name)}" target="_blank">
-    <span class="fi">${esc(f.icon||"📄")}</span> ${esc(f.name)} ${f.year?`<span class="chip gold">พ.ศ. ${esc(f.year)}</span>`:""} <span class="chip cat">${esc(f.cat||"")}</span></a>`).join("")
+    <span class="fi">${esc(f.icon||"📄")}</span> ${esc(f.name)} ${f.year?`<span class="chip gold">พ.ศ. ${esc(f.year)}</span>`:""} <span class="chip cat">${esc(f.cat||"")}</span>${f.count?`<span class="chip cat">${esc(f.count)} ไฟล์${f.vids?" · 🎬"+esc(f.vids):""}</span>`:""}</a>`).join("")
     :'<div class="loadmsg">ไม่พบเอกสารที่ค้นหา</div>';
   window._fileview=list;
 }
